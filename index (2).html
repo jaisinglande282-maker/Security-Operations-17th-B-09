@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDFC Operations & Parking Management Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        .header {
+            background-color: #0b4632;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .section-box {
+            background: white;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 { color: #0b4632; font-size: 18px; border-bottom: 2px solid #0b4632; padding-bottom: 5px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #0b4632;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:hover { background-color: #146c43; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table, th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+        th { background-color: #0b4632; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1 style="margin:0; font-size: 22px;">IDFC FIRST Bank Operations</h1>
+            <p style="margin:5px 0 0 0; font-size: 14px;">Airoli Gigaplex Building NO-09</p>
+        </div>
+        <div id="live-time" style="font-size: 14px; font-weight: bold;"></div>
+    </div>
+
+    <!-- Master Actions & Excel Download -->
+    <div class="section-box">
+        <h2>⚡ Master Actions & Excel Export</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Filter by Date (Backup Check)</label>
+                <input type="date" id="filter-date">
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button class="btn" onclick="filterData()">🔍 Filter Data</button>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button class="btn" style="background-color: #198754;" onclick="downloadExcel()">📥 Download Excel (.csv)</button>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button class="btn" style="background-color: #d9534f;" onclick="clearForm()">🗑️ Clear Form</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Shift General Info & Headcount Details -->
+    <div class="section-box">
+        <h2>📊 1. Shift General Info & Headcount Details</h2>
+        <div class="form-grid">
+            <div class="form-group"><label>Date (DD/MM/YYYY)</label><input type="text" id="hc-date"></div>
+            <div class="form-group"><label>Building Name</label><input type="text" id="b-name" value="Airoli Gigaplex Building NO-09"></div>
+            <div class="form-group"><label>On Roll Employee</label><input type="number" id="on-roll" value="415" oninput="calculateTotal()"></div>
+            <div class="form-group"><label>Off Roll Employee</label><input type="number" id="off-roll" value="33" oninput="calculateTotal()"></div>
+            <div class="form-group"><label>Security duty on</label><input type="number" id="sec-duty" value="3" oninput="calculateTotal()"></div>
+            <div class="form-group"><label>H K staff on duty</label><input type="number" id="hk-staff" value="8" oninput="calculateTotal()"></div>
+            <div class="form-group"><label>Technical staff</label><input type="number" id="tech" value="2" oninput="calculateTotal()"></div>
+            <div class="form-group"><label>Cafeteria staff</label><input type="number" id="cafe" value="55" oninput="calculateTotal()"></div>
+            <div class="form-group"><label>Sender Name</label><input type="text" id="sender-name" value="Jaysing Lande"></div>
+        </div>
+        <h3 style="margin-top: 15px; font-size: 16px;">Total Head Count: <span id="total-hc" style="color: #0b4632;">516</span></h3>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn" onclick="shareExactWhatsApp()">📲 Copy Exact WhatsApp Message</button>
+            <button class="btn" style="background-color: #25d366;" onclick="sendDirectWhatsApp()">💬 Send Directly on WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- 2. Security Postings Allocation -->
+    <div class="section-box">
+        <h2>🛡️ 2. Security Postings Allocation</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Select Shift</label>
+                <select id="sec-shift">
+                    <option>2nd Shift</option>
+                    <option>1st Shift</option>
+                    <option>3rd Shift</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Reception 01</label><input type="text" id="rec-1" value="santosh kadam"></div>
+            <div class="form-group"><label>Reception 02</label><input type="text" id="rec-2" value="Ranubai Gavade"></div>
+            <div class="form-group"><label>PTL Security</label><input type="text" id="ptl-sec" value="Sunil Bhure"></div>
+            <div class="form-group"><label>BMS Security</label><input type="text" id="bms" value="Jaysing Lande"></div>
+            <div class="form-group"><label>Location / Floor</label><input type="text" id="sec-loc" value="Airoli B-09 Floor 17th"></div>
+        </div>
+        <button class="btn" onclick="shareSecurityWhatsApp()">📲 Share Security on WhatsApp</button>
+    </div>
+
+    <!-- 3. Staff Car & Bike Parking Entry Form -->
+    <div class="section-box">
+        <h2>🚘 3. Staff Car & Bike Parking Entry Form</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Vehicle Type</label>
+                <select id="v-type"><option>Bike</option><option>Car</option></select>
+            </div>
+            <div class="form-group"><label>Vehicle Number</label><input type="text" id="v-no" placeholder="mh01ab1662" oninput="checkVehicleExists()"></div>
+            <div class="form-group"><label>Staff ID</label><input type="text" id="s-id" placeholder="IDFC1234"></div>
+            <div class="form-group"><label>Staff Name</label><input type="text" id="s-name" placeholder="Full Name"></div>
+            <div class="form-group"><label>Mobile</label><input type="text" id="s-mob" placeholder="Mobile Number"></div>
+            <div class="form-group"><label>Slot No.</label><input type="text" id="s-slot" placeholder="P2-102"></div>
+            <div class="form-group"><label>Report Given By</label><input type="text" id="parking-sender" value="Jaysing Lande"></div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn" onclick="saveParking()">💾 Save Staff Parking</button>
+            <button class="btn" style="background-color: #25d366;" onclick="shareParkingWhatsApp()">📲 Share Parking on WhatsApp</button>
+        </div>
+        
+        <table id="parking-table">
+            <thead>
+                <tr><th>Sr</th><th>Time</th><th>Type</th><th>Vehicle No</th><th>Staff</th><th>Slot</th></tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="6" style="text-align: center;">No entries.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 4. Staff Night Cab Report -->
+    <div class="section-box">
+        <h2>🚐 4. Staff Night Cab Report</h2>
+        <div class="form-grid">
+            <div class="form-group"><label>Cab Vehicle Number</label><input type="text" id="cab-no" placeholder="MH 05 FJ 2531" oninput="checkCabExists()"></div>
+            <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" placeholder="23:55"></div>
+            <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" placeholder="Datta Bhau"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-routes" placeholder="Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada"></div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+            <button class="btn" onclick="saveCab()">💾 Save Cab Entry</button>
+            <button class="btn" style="background-color: #25d366;" onclick="shareCabWhatsApp()">📲 Share Cab Report on WhatsApp</button>
+        </div>
+
+        <table id="cab-table">
+            <thead>
+                <tr><th>Sr</th><th>Cab No</th><th>Time</th><th>Driver</th><th>Drop Locations</th></tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="5" style="text-align: center;">No cab entries.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Script -->
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('live-time').innerText = now.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'medium' });
+            if(!document.getElementById('hc-date').value) {
+                let day = String(now.getDate()).padStart(2, '0');
+                let month = String(now.getMonth() + 1).padStart(2, '0');
+                let year = now.getFullYear();
+                document.getElementById('hc-date').value = `${day}/${month}/${year}`;
+            }
+        }
+        updateDateTime();
+
+        function calculateTotal() {
+            let onRoll = parseInt(document.getElementById('on-roll').value) || 0;
+            let offRoll = parseInt(document.getElementById('off-roll').value) || 0;
+            let secDuty = parseInt(document.getElementById('sec-duty').value) || 0;
+            let hkStaff = parseInt(document.getElementById('hk-staff').value) || 0;
+            let tech = parseInt(document.getElementById('tech').value) || 0;
+            let cafe = parseInt(document.getElementById('cafe').value) || 0;
+
+            let total = onRoll + offRoll + secDuty + hkStaff + tech + cafe;
+            document.getElementById('total-hc').innerText = total;
+        }
+
+        function getFormattedMessage() {
+            let date = document.getElementById('hc-date').value;
+            let building = document.getElementById('b-name').value;
+            let onRoll = document.getElementById('on-roll').value;
+            let offRoll = document.getElementById('off-roll').value;
+            let secDuty = document.getElementById('sec-duty').value;
+            let hkStaff = document.getElementById('hk-staff').value;
+            let tech = document.getElementById('tech').value;
+            let cafe = document.getElementById('cafe').value;
+            let total = document.getElementById('total-hc').innerText;
+            let sender = document.getElementById('sender-name').value;
+
+            return `*Date:-${date}*\n*${building}*\n1] On roll Employee:-${onRoll}\n2] Off roll Employee:-${offRoll}\n3] Security duty on:-${secDuty}\n4] H K staff on duty:-${hkStaff}\n5] Technical staff:-${tech}\n6] Cafeteria staff:-${cafe}\nTotal head count:-${total}\n\n*Regards,*\n*IDFC First bank*\n*${building}*\n*(${sender})*`;
+        }
+
+        function shareExactWhatsApp() {
+            let msg = getFormattedMessage();
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('Exact message copied with bold formatting!');
+            });
+        }
+
+        function sendDirectWhatsApp() {
+            let msg = encodeURIComponent(getFormattedMessage());
+            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+        }
+
+        // Parking Logic
+        let vehicleDatabase = {
+            "MH01AB1662": { type: "Car", id: "654321", name: "Sandeep Kaka", mob: "1234567891", slot: "3 P 35" }
+        };
+
+        let parkingData = [
+            { time: "04:24", type: "Bike", vNo: "MH 01 AB 6229", sName: "Jaysing Lande", slot: "3 P 34", id: "", mob: "" },
+            { time: "04:25", type: "Car", vNo: "MH 01 AB 1662", sName: "Sandeep Kaka", slot: "3 P 35", id: "654321", mob: "1234567891" }
+        ];
+        updateParkingTable();
+
+        function formatVehicleNo(input) {
+            let clean = input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if(clean.length >= 10) {
+                return `${clean.slice(0,2)} ${clean.slice(2,4)} ${clean.slice(4,6)} ${clean.slice(6)}`;
+            }
+            return input.toUpperCase();
+        }
+
+        function checkVehicleExists() {
+            let rawInput = document.getElementById('v-no').value;
+            let formattedKey = rawInput.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            
+            for(let key in vehicleDatabase) {
+                let cleanKey = key.replace(/[^A-Z0-9]/g, '');
+                if(cleanKey === formattedKey) {
+                    let data = vehicleDatabase[key];
+                    document.getElementById('v-type').value = data.type;
+                    document.getElementById('s-id').value = data.id;
+                    document.getElementById('s-name').value = data.name;
+                    document.getElementById('s-mob').value = data.mob;
+                    document.getElementById('s-slot').value = data.slot;
+                    break;
+                }
+            }
+        }
+
+        function saveParking() {
+            let rawVNo = document.getElementById('v-no').value;
+            if(!rawVNo) {
+                alert('Please enter Vehicle Number!');
+                return;
+            }
+            let vNo = formatVehicleNo(rawVNo);
+            let type = document.getElementById('v-type').value;
+            let sId = document.getElementById('s-id').value;
+            let sName = document.getElementById('s-name').value;
+            let sMob = document.getElementById('s-mob').value;
+            let slot = document.getElementById('s-slot').value;
+            let time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+            if(!sName) {
+                alert('Please enter Staff Name!');
+                return;
+            }
+
+            parkingData.push({ time, type, vNo, sName, slot, id: sId, mob: sMob });
+            updateParkingTable();
+            alert('Parking Entry Saved Successfully!');
+        }
+
+        function updateParkingTable() {
+            let tbody = document.querySelector('#parking-table tbody');
+            tbody.innerHTML = '';
+            if(parkingData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No entries.</td></tr>';
+                return;
+            }
+            parkingData.forEach((item, index) => {
+                tbody.innerHTML += `<tr><td>${index+1}</td><td>${item.time}</td><td>${item.type}</td><td>${item.vNo}</td><td>${item.sName}</td><td>${item.slot}</td></tr>`;
+            });
+        }
+
+        function shareParkingWhatsApp() {
+            if(parkingData.length === 0) {
+                alert('No parking entries to share!');
+                return;
+            }
+            let date = document.getElementById('hc-date').value;
+            let senderName = document.getElementById('parking-sender').value;
+            
+            let msg = `*Staff Parking Report - ${date}*\n\n`;
+            
+            parkingData.forEach((item, index) => {
+                let badge = item.type === 'Car' ? '(C)' : '(B)';
+                let cleanVNo = item.vNo.replace(/\s+/g, '');
+                msg += `${index + 1}.${cleanVNo} ${badge} ${item.sName}\n`;
+            });
+
+            msg += `\n*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Cab Report Logic
+        let cabDatabase = {
+            "MH05FJ2531": { time: "23:55", driver: "Datta Bhau", routes: "Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada" }
+        };
+
+        let cabData = [
+            { cabNo: "MH 05 FJ 2531", time: "23:55", driver: "Datta Bhau", routes: "Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada" }
+        ];
+        updateCabTable();
+
+        function checkCabExists() {
+            let rawInput = document.getElementById('cab-no').value;
+            let formattedKey = rawInput.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            
+            for(let key in cabDatabase) {
+                let cleanKey = key.replace(/[^A-Z0-9]/g, '');
+                if(cleanKey === formattedKey) {
+                    let data = cabDatabase[key];
+                    document.getElementById('cab-time').value = data.time;
+                    document.getElementById('cab-driver').value = data.driver;
+                    document.getElementById('cab-routes').value = data.routes;
+                    break;
+                }
+            }
+        }
+
+        function saveCab() {
+            let cabNo = document.getElementById('cab-no').value;
+            let time = document.getElementById('cab-time').value;
+            let driver = document.getElementById('cab-driver').value;
+            let routes = document.getElementById('cab-routes').value;
+
+            if(!cabNo || !driver) {
+                alert('Please enter Cab Number and Driver Name!');
+                return;
+            }
+
+            // Save to database for auto-fill in future
+            let cleanKey = cabNo.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            cabDatabase[cleanKey] = { time, driver, routes };
+
+            cabData.push({ cabNo, time, driver, routes });
+            updateCabTable();
+            alert('Cab Entry Saved Successfully!');
+        }
+
+        function updateCabTable() {
+            let tbody = document.querySelector('#cab-table tbody');
+            tbody.innerHTML = '';
+            if(cabData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No cab entries.</td></tr>';
+                return;
+            }
+            cabData.forEach((item, index) => {
+                tbody.innerHTML += `<tr><td>${index+1}</td><td>${item.cabNo}</td><td>${item.time}</td><td>${item.driver}</td><td>${item.routes}</td></tr>`;
+            });
+        }
+
+        function shareCabWhatsApp() {
+            if(cabData.length === 0) {
+                alert('No cab entries to share!');
+                return;
+            }
+            let date = document.getElementById('hc-date').value;
+            let senderName = document.getElementById('parking-sender').value;
+
+            let msg = `*Staff Night Cab Report - ${date}*\n\n`;
+
+            cabData.forEach((item, index) => {
+                let cleanCabNo = item.cabNo.replace(/\s+/g, '');
+                let timeStr = item.time ? ` (${item.time}) ` : ' ';
+                msg += `*${index + 1}) ${cleanCabNo}${timeStr}${item.driver}*\n`;
+                
+                if(item.routes) {
+                    let locs = item.routes.split(',');
+                    let routeString = "";
+                    locs.forEach((loc, idx) => {
+                        routeString += `${idx + 1})${loc.trim()} `;
+                    });
+                    msg += `${routeString.trim()}\n\n`;
+                }
+            });
+
+            msg += `*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Excel Download Function
+        function downloadExcel() {
+            let date = document.getElementById('hc-date').value || "Report";
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            csvContent += "--- SHIFT GENERAL INFO ---\n";
+            csvContent += `Date,${date}\n`;
+            csvContent += `On Roll,${document.getElementById('on-roll').value}\n`;
+            csvContent += `Off Roll,${document.getElementById('off-roll').value}\n`;
+            csvContent += `Total Headcount,${document.getElementById('total-hc').innerText}\n\n`;
+
+            csvContent += "--- PARKING REPORT ---\n";
+            csvContent += "Sr,Time,Type,Vehicle No,Staff Name,Slot\n";
+            parkingData.forEach((p, idx) => {
+                csvContent += `${idx+1},${p.time},${p.type},${p.vNo},${p.sName},${p.slot}\n`;
+            });
+            csvContent += "\n";
+
+            csvContent += "--- CAB REPORT ---\n";
+            csvContent += "Sr,Cab Number,Timing,Driver,Routes\n";
+            cabData.forEach((c, idx) => {
+                csvContent += `${idx+1},${c.cabNo},${c.time},${c.driver},"${c.routes}"\n`;
+            });
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `IDFC_Operations_${date.replace(/\//g, '-')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearForm() {
+            document.querySelectorAll('input[type="text"]:not([readonly]), input[type="number"], textarea').forEach(input => input.value = '');
+            alert('Form cleared!');
+        }
+
+        function filterData() {
+            let selectedDate = document.getElementById('filter-date').value;
+            if(!selectedDate) {
+                alert('Please select a date to filter backup data!');
+                return;
+            }
+            alert('Fetching records for date: ' + selectedDate);
+        }
+
+        function shareSecurityWhatsApp() {
+            let date = document.getElementById('hc-date').value;
+            let shift = document.getElementById('sec-shift').value;
+            let r1 = document.getElementById('rec-1').value;
+            let r2 = document.getElementById('rec-2').value;
+            let ptl = document.getElementById('ptl-sec').value;
+            let bms = document.getElementById('bms').value;
+            let loc = document.getElementById('sec-loc').value;
+
+            let msg = `*Date:-${date}*\n*Security Report - ${shift}*\n\n1) ${r1} (Rece-01)\n2) ${r2} (Rece-02)\n3) ${ptl} (PTL)\n4) ${bms} (BMS)\n\n${loc}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
