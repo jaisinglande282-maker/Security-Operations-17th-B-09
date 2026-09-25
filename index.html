@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDFC Operations & Parking Management Dashboard</title>
+    <title>IDFC Security & Operations Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,6 +19,13 @@
             border-radius: 8px;
             margin-bottom: 15px;
             text-align: center;
+        }
+        .app-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .section-box {
             background: white;
@@ -109,7 +116,7 @@
 <body>
 
     <div class="header">
-        <h2>IDFC FIRST Bank Operations</h2>
+        <h1 class="app-title">🛡️ IDFC Security & Operations</h1>
         <p style="font-size: 12px; margin: 5px 0 0 0;">Airoli Gigaplex Building NO-09 | <span id="current-time"></span></p>
     </div>
 
@@ -196,10 +203,10 @@
     <!-- 4. Staff Night Cab Report -->
     <div class="section-box tab-section" id="sec-cab">
         <h3>🚐 4. Staff Night Cab Report</h3>
-        <div class="form-group"><label>Cab Vehicle Number</label><input type="text" id="cab-no" value="MH 05 FJ 2531"></div>
+        <div class="form-group"><label>Cab Vehicle Number</label><input type="text" id="cab-no" value="MH05FJ2531"></div>
         <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" value="23:55"></div>
         <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" value="Datta Bhau"></div>
-        <div class="form-group"><label>Drop Locations</label><input type="text" id="cab-locations" value="Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada"></div>
+        <div class="form-group"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-locations" value="Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada"></div>
         <button onclick="saveCab()">💾 Save Cab Entry</button>
 
         <h4>Cab Records</h4>
@@ -284,16 +291,24 @@
         }
 
         function shareHeadcountWhatsApp() {
-            const text = `*IDFC FIRST Bank Operations - Headcount*\\n` +
-                         `Building: Airoli Gigaplex NO-09\\n` +
-                         `On Roll: ${document.getElementById('on-roll').value}\\n` +
-                         `Off Roll: ${document.getElementById('off-roll').value}\\n` +
-                         `Security Duty: ${document.getElementById('sec-duty').value}\\n` +
-                         `HK Staff: ${document.getElementById('hk-staff').value}\\n` +
-                         `Tech Staff: ${document.getElementById('tech-staff').value}\\n` +
-                         `Cafeteria: ${document.getElementById('cafe-staff').value}\\n` +
-                         `*Total Head Count: ${document.getElementById('total-headcount').innerText}*\\n` +
-                         `Sender: ${document.getElementById('sender-name').value}`;
+            const todayDate = "24/09/2026";
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+            const totalCount = document.getElementById('total-headcount').innerText;
+
+            const text = `Headcount-${todayDate}\n` +
+                         `Airoli Gigaplex Building NO-09\n` +
+                         `1] On roll Employee:-${document.getElementById('on-roll').value}\n` +
+                         `2] Off roll Employee:-${document.getElementById('off-roll').value}\n` +
+                         `3] Security duty on:-${document.getElementById('sec-duty').value}\n` +
+                         `4] H K staff on duty:-${document.getElementById('hk-staff').value}\n` +
+                         `5] Technical staff:-${document.getElementById('tech-staff').value}\n` +
+                         `6] Cafeteria staff:-${document.getElementById('cafe-staff').value}\n` +
+                         `Total head count:-${totalCount}\n\n` +
+                         `Regards,\n` +
+                         `IDFC First bank\n` +
+                         `Airoli Gigaplex Building NO-09\n` +
+                         `(${senderName})`;
+
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
@@ -322,12 +337,13 @@
         }
 
         function shareSecurityWhatsApp() {
-            const text = `*IDFC Security Postings Allocation*\\n` +
-                         `Shift: ${document.getElementById('sec-shift').value}\\n` +
-                         `Reception 01: ${document.getElementById('rec-1').value}\\n` +
-                         `Reception 02: ${document.getElementById('rec-2').value}\\n` +
-                         `PTL Security: ${document.getElementById('ptl-sec').value}\\n` +
-                         `BMS Security: ${document.getElementById('bms-sec').value}`;
+            const text = `Date:-24/09/2026\n` +
+                         `Security Report - ${document.getElementById('sec-shift').value}\n\n` +
+                         `1) ${document.getElementById('rec-1').value} (Rece-01)\n` +
+                         `2) ${document.getElementById('rec-2').value} (Rece-02)\n` +
+                         `3) ${document.getElementById('ptl-sec').value} (PTL)\n` +
+                         `4) ${document.getElementById('bms-sec').value} (BMS)\n\n` +
+                         `Airoli B-09 Floor 17th`;
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
@@ -402,26 +418,40 @@
 
         function shareParkingWhatsApp() {
             const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
-            let text = `*IDFC Parking Report (Total: ${parkingList.length})*\\n`;
-            parkingList.slice(0, 10).forEach((item, i) => {
-                text += `${i+1}. [${item.type}] ${item.vehicleNo} | Staff: ${item.staffName || 'N/A'} | Slot: ${item.slot}\\n`;
+            const todayDate = "24/09/2026";
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+
+            let text = `Staff Parking Report - ${todayDate}\n\n`;
+            parkingList.forEach((item, i) => {
+                let typeShort = item.type === 'Bike' ? 'B' : 'C';
+                text += `${i + 1}.${item.vehicleNo} (${typeShort}) ${item.staffName || 'N/A'}\n`;
             });
+            text += `\nAiroli B-09 Floor 17th\nReport By: ${senderName}`;
+
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
         // Cab Report Logic
         function saveCab() {
-            const cabNo = document.getElementById('cab-no').value;
-            const time = document.getElementById('cab-time').value;
-            const driver = document.getElementById('cab-driver').value;
-            const locations = document.getElementById('cab-locations').value;
+            const cabNo = document.getElementById('cab-no').value.trim();
+            const time = document.getElementById('cab-time').value.trim();
+            const driver = document.getElementById('cab-driver').value.trim();
+            const locations = document.getElementById('cab-locations').value.trim();
+
+            if (!cabNo) {
+                alert('Please enter Cab Vehicle Number!');
+                return;
+            }
 
             let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
             cabList.unshift({ cabNo, time, driver, locations });
 
             localStorage.setItem('idfc_cabs', JSON.stringify(cabList));
             loadCabData();
-            alert('Cab entry saved!');
+
+            document.getElementById('cab-no').value = '';
+            document.getElementById('cab-driver').value = '';
+            alert('Cab entry saved successfully!');
         }
 
         function loadCabData() {
@@ -434,7 +464,7 @@
                     <td>${index + 1}</td>
                     <td>${item.cabNo}</td>
                     <td>${item.time}</td>
-                    <td>${item.driver}</td>
+                    <td>${item.driver || 'N/A'}</td>
                     <td>${item.locations}</td>
                 </tr>`;
                 tbody.innerHTML += row;
@@ -442,11 +472,27 @@
         }
 
         function shareCabWhatsApp() {
-            const text = `*IDFC Staff Night Cab Report*\\n` +
-                         `Cab No: ${document.getElementById('cab-no').value}\\n` +
-                         `Time: ${document.getElementById('cab-time').value}\\n` +
-                         `Driver: ${document.getElementById('cab-driver').value}\\n` +
-                         `Locations: ${document.getElementById('cab-locations').value}`;
+            const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+            
+            let text = `Staff Night Cab Report - 24/09/2026\n\n`;
+            
+            if (cabList.length === 0) {
+                text += `1)MH05FJ2531(23:55)Datta Bhau\n` +
+                        `1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n` +
+                        `2)mh01cd1478()sandesh\n` +
+                        `1)Panvel 2)Soin 3)Taloja 4)Mulund 5)Govandi 6)\n\n` +
+                        `3)mh01cd1478(00:15)sandesh\n` +
+                        `1)Panvel 2)Soin 3)Taloja 4)Mulund 5)Govandi 6)\n\n`;
+            } else {
+                cabList.forEach((item, i) => {
+                    let locs = item.locations.split(',').map((l, idx) => `${idx + 1})${l.trim()}`).join(' ');
+                    text += `${i + 1})${item.cabNo}(${item.time})${item.driver}\n${locs}\n\n`;
+                });
+            }
+
+            text += `Airoli B-09 Floor 17th\nReport By: ${senderName}`;
+
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
     </script>
