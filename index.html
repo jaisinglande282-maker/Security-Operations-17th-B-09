@@ -99,11 +99,13 @@
             display: flex;
             gap: 5px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         .tab-buttons button {
             background-color: #6c757d;
             font-size: 12px;
             padding: 8px 5px;
+            flex: 1;
         }
         .tab-buttons button.active {
             background-color: #0b4632;
@@ -129,6 +131,7 @@
             <button onclick="switchTab('security')" id="btn-security">Security</button>
             <button onclick="switchTab('parking')" id="btn-parking">Parking</button>
             <button onclick="switchTab('cab')" id="btn-cab">Cabs</button>
+            <button onclick="switchTab('master')" id="btn-master">Master Report</button>
         </div>
     </div>
 
@@ -225,6 +228,20 @@
         <button class="whatsapp-btn" onclick="shareCabWhatsApp()">📤 Share Cab Report on WhatsApp</button>
     </div>
 
+    <!-- 5. Master Report & Historical Search Section -->
+    <div class="section-box tab-section" id="sec-master">
+        <h3>🔍 5. Master Report & Historical Date Search (Old Data)</h3>
+        <p style="font-size: 13px; color: #666;">Select any past date (even months old) to view or search records for that specific day:</p>
+        <div class="form-group">
+            <label>Select Report Date</label>
+            <input type="date" id="master-date-picker" onchange="loadMasterDataForDate()">
+        </div>
+        
+        <div id="master-results" style="margin-top: 15px;">
+            <!-- Dynamic historical data will load here -->
+        </div>
+    </div>
+
     <script>
         // Real-time Clock in Header
         setInterval(() => {
@@ -237,12 +254,17 @@
             loadSecurity();
             loadParkingData();
             loadCabData();
+            
+            // Set default date picker to today in Master tab
+            const todayISO = new Date().toISOString().split('T')[0];
+            document.getElementById('master-date-picker').value = todayISO;
+            loadMasterDataForDate();
         };
 
         // Tab Switching for Mobile Ease
         function switchTab(tab) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('hidden'));
-            ['all', 'headcount', 'security', 'parking', 'cab'].forEach(t => document.getElementById('btn-' + t).classList.remove('active'));
+            ['all', 'headcount', 'security', 'parking', 'cab', 'master'].forEach(t => document.getElementById('btn-' + t).classList.remove('active'));
 
             if (tab !== 'all') {
                 document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
@@ -255,12 +277,18 @@
         function formatVehicleNumber(inputStr) {
             if (!inputStr) return '';
             let clean = inputStr.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            // Match pattern like MH01AB6229 -> MH 01 AB 6229
             let match = clean.match(/^([A-Z]{2})(\d{2})([A-Z]{1,2})(\d{4})$/);
             if (match) {
                 return `${match[1]} ${match[2]} ${match[3]} ${match[4]}`;
             }
             return clean;
+        }
+
+        // Helper to get formatted date string DD/MM/YYYY from Date object or ISO string
+        function getFormattedDate(dateObj = new Date()) {
+            return String(dateObj.getDate()).padStart(2, '0') + '/' + 
+                   String(dateObj.getMonth() + 1).padStart(2, '0') + '/' + 
+                   dateObj.getFullYear();
         }
 
         // Headcount Logic
@@ -282,9 +310,15 @@
                 hkStaff: document.getElementById('hk-staff').value,
                 techStaff: document.getElementById('tech-staff').value,
                 cafeStaff: document.getElementById('cafe-staff').value,
-                sender: document.getElementById('sender-name').value
+                sender: document.getElementById('sender-name').value,
+                timestamp: new Date().toISOString()
             };
             localStorage.setItem('idfc_headcount', JSON.stringify(data));
+            
+            // Save to historical archive by ISO date
+            const dateKey = new Date().toISOString().split('T')[0];
+            localStorage.setItem('idfc_headcount_' + dateKey, JSON.stringify(data));
+
             alert('Headcount saved successfully!');
         }
 
@@ -303,8 +337,7 @@
         }
 
         function shareHeadcountWhatsApp() {
-            const now = new Date();
-            const todayDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
             const totalCount = document.getElementById('total-headcount').innerText;
 
@@ -332,9 +365,14 @@
                 rec1: document.getElementById('rec-1').value,
                 rec2: document.getElementById('rec-2').value,
                 ptl: document.getElementById('ptl-sec').value,
-                bms: document.getElementById('bms-sec').value
+                bms: document.getElementById('bms-sec').value,
+                timestamp: new Date().toISOString()
             };
             localStorage.setItem('idfc_security', JSON.stringify(data));
+            
+            const dateKey = new Date().toISOString().split('T')[0];
+            localStorage.setItem('idfc_security_' + dateKey, JSON.stringify(data));
+
             alert('Security postings saved!');
         }
 
@@ -350,8 +388,7 @@
         }
 
         function shareSecurityWhatsApp() {
-            const now = new Date();
-            const todayDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            const todayDate = getFormattedDate();
             
             const text = `*Date:-${todayDate}*\n` +
                          `*Security Report - ${document.getElementById('sec-shift').value}*\n\n` +
@@ -395,11 +432,13 @@
 
             const vehicleNo = formatVehicleNumber(rawVehNo);
             const now = new Date();
-            const dateTimeStr = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateTimeStr = getFormattedDate(now) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateKey = now.toISOString().split('T')[0];
 
             let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
 
-            parkingList.unshift({
+            const newEntry = {
+                dateKey: dateKey,
                 dateTime: dateTimeStr,
                 type: type,
                 vehicleNo: vehicleNo,
@@ -407,8 +446,9 @@
                 staffName: staffName,
                 mobile: mobile,
                 slot: slot
-            });
+            };
 
+            parkingList.unshift(newEntry);
             localStorage.setItem('idfc_parking', JSON.stringify(parkingList));
             loadParkingData();
 
@@ -440,8 +480,7 @@
 
         function shareParkingWhatsApp() {
             const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
-            const now = new Date();
-            const todayDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
 
             let text = `*Staff Parking Report - ${todayDate}*\n\n`;
@@ -466,8 +505,11 @@
                 return;
             }
 
+            const now = new Date();
+            const dateKey = now.toISOString().split('T')[0];
+
             let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
-            cabList.unshift({ cabNo, time, driver, locations });
+            cabList.unshift({ dateKey, cabNo, time, driver, locations });
 
             localStorage.setItem('idfc_cabs', JSON.stringify(cabList));
             loadCabData();
@@ -496,8 +538,7 @@
 
         function shareCabWhatsApp() {
             const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
-            const now = new Date();
-            const todayDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
             
             let text = `*Staff Night Cab Report - ${todayDate}*\n\n`;
@@ -519,6 +560,66 @@
             text += `*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
 
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // Master Report Historical Date Search
+        function loadMasterDataForDate() {
+            const selectedISO = document.getElementById('master-date-picker').value;
+            if (!selectedISO) return;
+
+            let parts = selectedISO.split('-');
+            const displayDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+
+            // Fetch archive data
+            const headcountArch = JSON.parse(localStorage.getItem('idfc_headcount_' + selectedISO));
+            const securityArch = JSON.parse(localStorage.getItem('idfc_security_' + selectedISO));
+            
+            const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            const filteredParking = parkingList.filter(p => p.dateKey === selectedISO);
+
+            const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            const filteredCabs = cabList.filter(c => c.dateKey === selectedISO);
+
+            let html = `<h4>📊 Summary for Date: ${displayDate}</h4>`;
+
+            // Headcount summary
+            if (headcountArch) {
+                let totalHC = parseInt(headcountArch.onRoll) + parseInt(headcountArch.offRoll) + parseInt(headcountArch.secDuty) + parseInt(headcountArch.hkStaff) + parseInt(headcountArch.techStaff) + parseInt(headcountArch.cafeStaff);
+                html += `<div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:10px;">
+                    <strong>Headcount Report (${displayDate}):</strong><br>
+                    - On Roll: ${headcountArch.onRoll}, Off Roll: ${headcountArch.offRoll}<br>
+                    - Security: ${headcountArch.secDuty}, HK: ${headcountArch.hkStaff}, Tech: ${headcountArch.techStaff}, Cafe: ${headcountArch.cafeStaff}<br>
+                    <strong>Total Head Count: ${totalHC}</strong>
+                </div>`;
+            } else {
+                html += `<p style="color:#888;">No Headcount saved for ${displayDate}.</p>`;
+            }
+
+            // Parking records summary
+            html += `<h5>🚘 Parking Entries (${filteredParking.length})</h5>`;
+            if (filteredParking.length > 0) {
+                html += `<ul>`;
+                filteredParking.forEach(p => {
+                    html += `<li>${p.dateTime} - ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'} (Slot: ${p.slot})</li>`;
+                });
+                html += `</ul>`;
+            } else {
+                html += `<p style="color:#888;">No parking entries found for this date.</p>`;
+            }
+
+            // Cab records summary
+            html += `<h5>🚐 Cab Entries (${filteredCabs.length})</h5>`;
+            if (filteredCabs.length > 0) {
+                html += `<ul>`;
+                filteredCabs.forEach(c => {
+                    html += `<li>Cab: ${c.cabNo} (${c.time}) - Driver: ${c.driver} | Routes: ${c.locations}</li>`;
+                });
+                html += `</ul>`;
+            } else {
+                html += `<p style="color:#888;">No cab entries found for this date.</p>`;
+            }
+
+            document.getElementById('master-results').innerHTML = html;
         }
     </script>
 </body>
