@@ -206,10 +206,13 @@
     <!-- 4. Staff Night Cab Report -->
     <div class="section-box tab-section" id="sec-cab">
         <h3>🚐 4. Staff Night Cab Report</h3>
-        <div class="form-group"><label>Cab Vehicle Number</label><input type="text" id="cab-no" value="MH05FJ2531"></div>
-        <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" value="23:55"></div>
-        <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" value="Datta Bhau"></div>
-        <div class="form-group"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-locations" value="Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada"></div>
+        <div class="form-group">
+            <label>Cab Vehicle Number (Auto-Fill)</label>
+            <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531" onkeyup="autoFillCab(this.value)">
+        </div>
+        <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" placeholder="23:55"></div>
+        <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" placeholder="Driver Name"></div>
+        <div class="form-group"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-locations" placeholder="Ulhasnagar, Vashi, Panvel..."></div>
         <button onclick="saveCab()">💾 Save Cab Entry</button>
 
         <h4>Cab Records</h4>
@@ -315,7 +318,6 @@
             };
             localStorage.setItem('idfc_headcount', JSON.stringify(data));
             
-            // Save to historical archive by ISO date
             const dateKey = new Date().toISOString().split('T')[0];
             localStorage.setItem('idfc_headcount_' + dateKey, JSON.stringify(data));
 
@@ -400,7 +402,7 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Parking Auto-Fill (Flexible Search) & Save Logic
+        // Parking Auto-Fill & Save Logic
         function autoFillParking(vehNo) {
             let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             if (!cleanQuery) return;
@@ -457,7 +459,7 @@
             document.getElementById('p-staff-name').value = '';
             document.getElementById('p-mobile').value = '';
             document.getElementById('p-slot').value = '';
-            alert('Parking entry saved with automatic date & time!');
+            alert('Parking entry saved successfully!');
         }
 
         function loadParkingData() {
@@ -493,18 +495,33 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Cab Report Logic
+        // Cab Auto-Fill & Save Logic
+        function autoFillCab(vehNo) {
+            let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (!cleanQuery) return;
+
+            let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            let found = cabList.find(c => c.cabNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === cleanQuery);
+
+            if (found) {
+                document.getElementById('cab-time').value = found.time || '';
+                document.getElementById('cab-driver').value = found.driver || '';
+                document.getElementById('cab-locations').value = found.locations || '';
+            }
+        }
+
         function saveCab() {
-            const cabNo = formatVehicleNumber(document.getElementById('cab-no').value.trim());
+            const rawCabNo = document.getElementById('cab-no').value.trim();
             const time = document.getElementById('cab-time').value.trim();
             const driver = document.getElementById('cab-driver').value.trim();
             const locations = document.getElementById('cab-locations').value.trim();
 
-            if (!cabNo) {
+            if (!rawCabNo) {
                 alert('Please enter Cab Vehicle Number!');
                 return;
             }
 
+            const cabNo = formatVehicleNumber(rawCabNo);
             const now = new Date();
             const dateKey = now.toISOString().split('T')[0];
 
@@ -515,7 +532,9 @@
             loadCabData();
 
             document.getElementById('cab-no').value = '';
+            document.getElementById('cab-time').value = '';
             document.getElementById('cab-driver').value = '';
+            document.getElementById('cab-locations').value = '';
             alert('Cab entry saved successfully!');
         }
 
@@ -545,11 +564,7 @@
             
             if (cabList.length === 0) {
                 text += `1)MH 05 FJ 2531(23:55)Datta Bhau\n` +
-                        `1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n` +
-                        `2)MH 01 CD 1478()sandesh\n` +
-                        `1)Panvel 2)Soin 3)Taloja 4)Mulund 5)Govandi 6)\n\n` +
-                        `3)MH 01 CD 1478(00:15)sandesh\n` +
-                        `1)Panvel 2)Soin 3)Taloja 4)Mulund 5)Govandi 6)\n\n`;
+                        `1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n`;
             } else {
                 cabList.forEach((item, i) => {
                     let locs = item.locations.split(',').map((l, idx) => `${idx + 1})${l.trim()}`).join(' ');
@@ -570,10 +585,7 @@
             let parts = selectedISO.split('-');
             const displayDate = parts[2] + '/' + parts[1] + '/' + parts[0];
 
-            // Fetch archive data
             const headcountArch = JSON.parse(localStorage.getItem('idfc_headcount_' + selectedISO));
-            const securityArch = JSON.parse(localStorage.getItem('idfc_security_' + selectedISO));
-            
             const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
             const filteredParking = parkingList.filter(p => p.dateKey === selectedISO);
 
@@ -582,7 +594,6 @@
 
             let html = `<h4>📊 Summary for Date: ${displayDate}</h4>`;
 
-            // Headcount summary
             if (headcountArch) {
                 let totalHC = parseInt(headcountArch.onRoll) + parseInt(headcountArch.offRoll) + parseInt(headcountArch.secDuty) + parseInt(headcountArch.hkStaff) + parseInt(headcountArch.techStaff) + parseInt(headcountArch.cafeStaff);
                 html += `<div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:10px;">
@@ -595,7 +606,6 @@
                 html += `<p style="color:#888;">No Headcount saved for ${displayDate}.</p>`;
             }
 
-            // Parking records summary
             html += `<h5>🚘 Parking Entries (${filteredParking.length})</h5>`;
             if (filteredParking.length > 0) {
                 html += `<ul>`;
@@ -607,7 +617,6 @@
                 html += `<p style="color:#888;">No parking entries found for this date.</p>`;
             }
 
-            // Cab records summary
             html += `<h5>🚐 Cab Entries (${filteredCabs.length})</h5>`;
             if (filteredCabs.length > 0) {
                 html += `<ul>`;
