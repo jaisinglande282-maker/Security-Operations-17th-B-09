@@ -9,35 +9,37 @@
             font-family: Arial, sans-serif;
             background-color: #f4f6f9;
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             color: #333;
         }
         .header {
             background-color: #0b4632;
             color: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            text-align: center;
         }
         .section-box {
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         h2, h3 {
             color: #0b4632;
             margin-top: 0;
+            font-size: 18px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
         }
         input, select {
             width: 100%;
@@ -45,6 +47,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
+            font-size: 14px;
         }
         button {
             background-color: #0b4632;
@@ -54,26 +57,52 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            margin-right: 5px;
+            width: 100%;
             margin-top: 5px;
+            font-size: 14px;
         }
         button:hover {
             background-color: #083324;
         }
+        .whatsapp-btn {
+            background-color: #25D366;
+            margin-top: 10px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1EBE5D;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
+            overflow-x: auto;
+            display: block;
         }
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
         }
         th {
             background-color: #0b4632;
             color: white;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .tab-buttons button {
+            background-color: #6c757d;
+            font-size: 12px;
+            padding: 8px 5px;
+        }
+        .tab-buttons button.active {
+            background-color: #0b4632;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -81,46 +110,38 @@
 
     <div class="header">
         <h2>IDFC FIRST Bank Operations</h2>
-        <p>Airoli Gigaplex Building NO-09 | <span id="current-time"></span></p>
+        <p style="font-size: 12px; margin: 5px 0 0 0;">Airoli Gigaplex Building NO-09 | <span id="current-time"></span></p>
+    </div>
+
+    <!-- Mobile Duty Selection Tabs -->
+    <div class="section-box" style="background: #e9ecef; padding: 10px;">
+        <label>📱 Select Duty / Section to Work On:</label>
+        <div class="tab-buttons">
+            <button onclick="switchTab('all')" id="btn-all" class="active">All View</button>
+            <button onclick="switchTab('headcount')" id="btn-headcount">Headcount</button>
+            <button onclick="switchTab('security')" id="btn-security">Security</button>
+            <button onclick="switchTab('parking')" id="btn-parking">Parking</button>
+            <button onclick="switchTab('cab')" id="btn-cab">Cabs</button>
+        </div>
     </div>
 
     <!-- 1. Headcount Section -->
-    <div class="section-box">
+    <div class="section-box tab-section" id="sec-headcount">
         <h3>📊 1. Shift General Info & Headcount Details</h3>
-        <div class="form-group">
-            <label>On Roll Employee</label>
-            <input type="number" id="on-roll" value="415">
-        </div>
-        <div class="form-group">
-            <label>Off Roll Employee</label>
-            <input type="number" id="off-roll" value="33">
-        </div>
-        <div class="form-group">
-            <label>Security duty on</label>
-            <input type="number" id="sec-duty" value="3">
-        </div>
-        <div class="form-group">
-            <label>H K staff on duty</label>
-            <input type="number" id="hk-staff" value="8">
-        </div>
-        <div class="form-group">
-            <label>Technical staff</label>
-            <input type="number" id="tech-staff" value="2">
-        </div>
-        <div class="form-group">
-            <label>Cafeteria staff</label>
-            <input type="number" id="cafe-staff" value="55">
-        </div>
-        <div class="form-group">
-            <label>Sender Name</label>
-            <input type="text" id="sender-name" value="Jaysing Lande">
-        </div>
+        <div class="form-group"><label>On Roll Employee</label><input type="number" id="on-roll" value="415"></div>
+        <div class="form-group"><label>Off Roll Employee</label><input type="number" id="off-roll" value="33"></div>
+        <div class="form-group"><label>Security duty on</label><input type="number" id="sec-duty" value="3"></div>
+        <div class="form-group"><label>H K staff on duty</label><input type="number" id="hk-staff" value="8"></div>
+        <div class="form-group"><label>Technical staff</label><input type="number" id="tech-staff" value="2"></div>
+        <div class="form-group"><label>Cafeteria staff</label><input type="number" id="cafe-staff" value="55"></div>
+        <div class="form-group"><label>Sender Name</label><input type="text" id="sender-name" value="Jaysing Lande"></div>
         <p><strong>Total Head Count: <span id="total-headcount">516</span></strong></p>
         <button onclick="saveHeadcount()">Save Headcount</button>
+        <button class="whatsapp-btn" onclick="shareHeadcountWhatsApp()">📤 Share Headcount on WhatsApp</button>
     </div>
 
     <!-- 2. Security Postings -->
-    <div class="section-box">
+    <div class="section-box tab-section" id="sec-security">
         <h3>🛡️ 2. Security Postings Allocation</h3>
         <div class="form-group">
             <label>Select Shift</label>
@@ -130,54 +151,29 @@
                 <option>3rd Shift</option>
             </select>
         </div>
-        <div class="form-group">
-            <label>Reception 01</label>
-            <input type="text" id="rec-1" value="santosh kadam">
-        </div>
-        <div class="form-group">
-            <label>Reception 02</label>
-            <input type="text" id="rec-2" value="Ranubai Gavade">
-        </div>
-        <div class="form-group">
-            <label>PTL Security</label>
-            <input type="text" id="ptl-sec" value="Sunil Bhure">
-        </div>
-        <div class="form-group">
-            <label>BMS Security</label>
-            <input type="text" id="bms-sec" value="Jaysing Lande">
-        </div>
+        <div class="form-group"><label>Reception 01</label><input type="text" id="rec-1" value="santosh kadam"></div>
+        <div class="form-group"><label>Reception 02</label><input type="text" id="rec-2" value="Ranubai Gavade"></div>
+        <div class="form-group"><label>PTL Security</label><input type="text" id="ptl-sec" value="Sunil Bhure"></div>
+        <div class="form-group"><label>BMS Security</label><input type="text" id="bms-sec" value="Jaysing Lande"></div>
+        <button onclick="saveSecurity()">Save Security Postings</button>
+        <button class="whatsapp-btn" onclick="shareSecurityWhatsApp()">📤 Share Security on WhatsApp</button>
     </div>
 
     <!-- 3. Parking Entry Form -->
-    <div class="section-box">
-        <h3>🚘 3. Staff Car & Bike Parking Entry Form (Up to 100+ Entries)</h3>
+    <div class="section-box tab-section" id="sec-parking">
+        <h3>🚘 3. Staff Car & Bike Parking Entry Form (100+ Entries)</h3>
         <div class="form-group">
             <label>Vehicle Type</label>
-            <select id="p-type">
-                <option>Bike</option>
-                <option>Car</option>
-            </select>
+            <select id="p-type"><option>Bike</option><option>Car</option></select>
         </div>
         <div class="form-group">
             <label>Vehicle Number (Auto-Fill)</label>
             <input type="text" id="p-veh-no" placeholder="e.g. MH01AB1662" onkeyup="autoFillParking(this.value)">
         </div>
-        <div class="form-group">
-            <label>Staff ID</label>
-            <input type="text" id="p-staff-id" placeholder="Staff ID">
-        </div>
-        <div class="form-group">
-            <label>Staff Name</label>
-            <input type="text" id="p-staff-name" placeholder="Full Name">
-        </div>
-        <div class="form-group">
-            <label>Mobile</label>
-            <input type="text" id="p-mobile" placeholder="Mobile Number">
-        </div>
-        <div class="form-group">
-            <label>Slot No.</label>
-            <input type="text" id="p-slot" placeholder="Slot No.">
-        </div>
+        <div class="form-group"><label>Staff ID</label><input type="text" id="p-staff-id" placeholder="Staff ID"></div>
+        <div class="form-group"><label>Staff Name</label><input type="text" id="p-staff-name" placeholder="Full Name"></div>
+        <div class="form-group"><label>Mobile</label><input type="text" id="p-mobile" placeholder="Mobile Number"></div>
+        <div class="form-group"><label>Slot No.</label><input type="text" id="p-slot" placeholder="Slot No."></div>
         <button onclick="saveParking()">💾 Save Staff Parking</button>
         
         <h4>Parking Records</h4>
@@ -192,31 +188,18 @@
                     <th>Slot</th>
                 </tr>
             </thead>
-            <tbody id="parking-table-body">
-                <!-- Dynamic Rows -->
-            </tbody>
+            <tbody id="parking-table-body"></tbody>
         </table>
+        <button class="whatsapp-btn" onclick="shareParkingWhatsApp()">📤 Share Parking Report on WhatsApp</button>
     </div>
 
     <!-- 4. Staff Night Cab Report -->
-    <div class="section-box">
+    <div class="section-box tab-section" id="sec-cab">
         <h3>🚐 4. Staff Night Cab Report</h3>
-        <div class="form-group">
-            <label>Cab Vehicle Number</label>
-            <input type="text" id="cab-no" value="MH 05 FJ 2531">
-        </div>
-        <div class="form-group">
-            <label>Timing (HH:MM)</label>
-            <input type="text" id="cab-time" value="23:55">
-        </div>
-        <div class="form-group">
-            <label>Driver / Coordinator</label>
-            <input type="text" id="cab-driver" value="Datta Bhau">
-        </div>
-        <div class="form-group">
-            <label>Drop Locations (Comma separated)</label>
-            <input type="text" id="cab-locations" value="Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada">
-        </div>
+        <div class="form-group"><label>Cab Vehicle Number</label><input type="text" id="cab-no" value="MH 05 FJ 2531"></div>
+        <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" value="23:55"></div>
+        <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" value="Datta Bhau"></div>
+        <div class="form-group"><label>Drop Locations</label><input type="text" id="cab-locations" value="Ulhasnagar, Vashi, Panvel, Thane, Nerul, Airoli, Sanpada"></div>
         <button onclick="saveCab()">💾 Save Cab Entry</button>
 
         <h4>Cab Records</h4>
@@ -227,13 +210,12 @@
                     <th>Cab No</th>
                     <th>Time</th>
                     <th>Driver</th>
-                    <th>Drop Locations</th>
+                    <th>Locations</th>
                 </tr>
             </thead>
-            <tbody id="cab-table-body">
-                <!-- Dynamic Rows -->
-            </tbody>
+            <tbody id="cab-table-body"></tbody>
         </table>
+        <button class="whatsapp-btn" onclick="shareCabWhatsApp()">📤 Share Cab Report on WhatsApp</button>
     </div>
 
     <script>
@@ -243,12 +225,24 @@
             document.getElementById('current-time').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
         }, 1000);
 
-        // Load Data on Start
         window.onload = function() {
             loadHeadcount();
+            loadSecurity();
             loadParkingData();
             loadCabData();
         };
+
+        // Tab Switching for Mobile Ease
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('hidden'));
+            ['all', 'headcount', 'security', 'parking', 'cab'].forEach(t => document.getElementById('btn-' + t).classList.remove('active'));
+
+            if (tab !== 'all') {
+                document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById('sec-' + tab).classList.remove('hidden');
+            }
+            document.getElementById('btn-' + tab).classList.add('active');
+        }
 
         // Headcount Logic
         const headcountInputs = ['on-roll', 'off-roll', 'sec-duty', 'hk-staff', 'tech-staff', 'cafe-staff'];
@@ -289,7 +283,55 @@
             }
         }
 
-        // Auto-Fill Parking Details if Vehicle Number exists
+        function shareHeadcountWhatsApp() {
+            const text = `*IDFC FIRST Bank Operations - Headcount*\\n` +
+                         `Building: Airoli Gigaplex NO-09\\n` +
+                         `On Roll: ${document.getElementById('on-roll').value}\\n` +
+                         `Off Roll: ${document.getElementById('off-roll').value}\\n` +
+                         `Security Duty: ${document.getElementById('sec-duty').value}\\n` +
+                         `HK Staff: ${document.getElementById('hk-staff').value}\\n` +
+                         `Tech Staff: ${document.getElementById('tech-staff').value}\\n` +
+                         `Cafeteria: ${document.getElementById('cafe-staff').value}\\n` +
+                         `*Total Head Count: ${document.getElementById('total-headcount').innerText}*\\n` +
+                         `Sender: ${document.getElementById('sender-name').value}`;
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // Security Postings Logic
+        function saveSecurity() {
+            const data = {
+                shift: document.getElementById('sec-shift').value,
+                rec1: document.getElementById('rec-1').value,
+                rec2: document.getElementById('rec-2').value,
+                ptl: document.getElementById('ptl-sec').value,
+                bms: document.getElementById('bms-sec').value
+            };
+            localStorage.setItem('idfc_security', JSON.stringify(data));
+            alert('Security postings saved!');
+        }
+
+        function loadSecurity() {
+            const saved = JSON.parse(localStorage.getItem('idfc_security'));
+            if (saved) {
+                document.getElementById('sec-shift').value = saved.shift;
+                document.getElementById('rec-1').value = saved.rec1;
+                document.getElementById('rec-2').value = saved.rec2;
+                document.getElementById('ptl-sec').value = saved.ptl;
+                document.getElementById('bms-sec').value = saved.bms;
+            }
+        }
+
+        function shareSecurityWhatsApp() {
+            const text = `*IDFC Security Postings Allocation*\\n` +
+                         `Shift: ${document.getElementById('sec-shift').value}\\n` +
+                         `Reception 01: ${document.getElementById('rec-1').value}\\n` +
+                         `Reception 02: ${document.getElementById('rec-2').value}\\n` +
+                         `PTL Security: ${document.getElementById('ptl-sec').value}\\n` +
+                         `BMS Security: ${document.getElementById('bms-sec').value}`;
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // Parking Auto-Fill & Save Logic
         function autoFillParking(vehNo) {
             let cleanVeh = vehNo.trim().toUpperCase();
             let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
@@ -303,7 +345,6 @@
             }
         }
 
-        // Parking Save & Display (Supports 100+ entries)
         function saveParking() {
             const type = document.getElementById('p-type').value;
             const vehicleNo = document.getElementById('p-veh-no').value.trim();
@@ -333,13 +374,12 @@
             localStorage.setItem('idfc_parking', JSON.stringify(parkingList));
             loadParkingData();
 
-            // Clear form inputs except type
             document.getElementById('p-veh-no').value = '';
             document.getElementById('p-staff-id').value = '';
             document.getElementById('p-staff-name').value = '';
             document.getElementById('p-mobile').value = '';
             document.getElementById('p-slot').value = '';
-            alert('Parking entry saved successfully!');
+            alert('Parking entry saved!');
         }
 
         function loadParkingData() {
@@ -360,7 +400,16 @@
             });
         }
 
-        // Cab Report Save & Display
+        function shareParkingWhatsApp() {
+            const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            let text = `*IDFC Parking Report (Total: ${parkingList.length})*\\n`;
+            parkingList.slice(0, 10).forEach((item, i) => {
+                text += `${i+1}. [${item.type}] ${item.vehicleNo} | Staff: ${item.staffName || 'N/A'} | Slot: ${item.slot}\\n`;
+            });
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // Cab Report Logic
         function saveCab() {
             const cabNo = document.getElementById('cab-no').value;
             const time = document.getElementById('cab-time').value;
@@ -372,7 +421,7 @@
 
             localStorage.setItem('idfc_cabs', JSON.stringify(cabList));
             loadCabData();
-            alert('Cab entry saved successfully!');
+            alert('Cab entry saved!');
         }
 
         function loadCabData() {
@@ -390,6 +439,15 @@
                 </tr>`;
                 tbody.innerHTML += row;
             });
+        }
+
+        function shareCabWhatsApp() {
+            const text = `*IDFC Staff Night Cab Report*\\n` +
+                         `Cab No: ${document.getElementById('cab-no').value}\\n` +
+                         `Time: ${document.getElementById('cab-time').value}\\n` +
+                         `Driver: ${document.getElementById('cab-driver').value}\\n` +
+                         `Locations: ${document.getElementById('cab-locations').value}`;
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
     </script>
 </body>
