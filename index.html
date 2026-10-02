@@ -83,7 +83,7 @@
     <!-- 3. Parking Entry Form -->
     <div class="section-box tab-section" id="sec-parking">
         <h3>🚘 3. Staff Car & Bike Parking Entry Form</h3>
-        <div class="form-group"><label>Vehicle Type</label><select id="p-type"><option>Bike</option><option>Car</option></select></div>
+        <div class="form-group"><label>Vehicle Type</label><select id="p-type"><option>Car</option><option>Bike</option></select></div>
         <div class="form-group"><label>Date & Time</label><input type="text" id="p-datetime"></div>
         <div class="form-group"><label>Vehicle Number</label><input type="text" id="p-veh-no" placeholder="e.g. MH01AB6229"></div>
         <div class="form-group"><label>Staff ID</label><input type="text" id="p-staff-id" placeholder="Staff ID"></div>
@@ -370,10 +370,44 @@
             let text = `*Headcount-${new Date().toLocaleDateString()}*\nTotal: ${document.getElementById('total-headcount').innerText}`;
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
-        function shareSecurityWhatsApp() { window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Security Report'), '_blank'); }
-        function shareParkingWhatsApp() { window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Parking Report'), '_blank'); }
-        function shareCabWhatsApp() { window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Cab Report'), '_blank'); }
-        function shareMasterWhatsApp() { window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Master Report'), '_blank'); }
+        
+        function shareSecurityWhatsApp() { 
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Security Report'), '_blank'); 
+        }
+
+        function shareParkingWhatsApp() {
+            db.ref('idfc_parking').once('value', snapshot => {
+                let data = snapshot.val();
+                let today = new Date().toISOString().split('T')[0];
+                
+                // Sirf aaj ki entries filter karne ke liye (agar sabhi chahiye toh .filter hata sakte hain)
+                let list = data ? Object.values(data).filter(item => item.dateKey === today) : [];
+                
+                if (list.length === 0) {
+                    alert('Aaj ka koi parking record nahi mila share karne ke liye!');
+                    return;
+                }
+
+                let text = `*Staff Parking Report - ${new Date().toLocaleDateString('en-GB')}*\n\n`;
+                
+                list.forEach((item, index) => {
+                    let typeCode = item.type === 'Bike' ? 'B' : 'C';
+                    text += `${index + 1}.${item.vehicleNo || ''} (${typeCode}) ${item.staffName || 'N/A'}\n`;
+                });
+
+                text += `\nAiroli B-09 Floor 17th\nReport By: Jaysing Lande`;
+
+                window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+            });
+        }
+
+        function shareCabWhatsApp() { 
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Cab Report'), '_blank'); 
+        }
+
+        function shareMasterWhatsApp() { 
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Master Report'), '_blank'); 
+        }
     </script>
 </body>
 </html>
