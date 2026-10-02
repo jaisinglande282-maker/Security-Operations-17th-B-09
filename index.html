@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IDFC Security & Operations Dashboard</title>
     
-    <!-- Firebase App & Realtime Database SDKs -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -214,7 +214,6 @@
                 list.forEach((item, i) => {
                     tbody.innerHTML += `<tr><td>${i+1}</td><td>${item.dateTime || ''}</td><td>${item.type || ''}</td><td>${item.vehicleNo || ''}</td><td>${item.staffName||'N/A'}</td><td>${item.slot || ''}</td></tr>`;
                 });
-                loadMasterDataForDate();
             });
 
             db.ref('idfc_cabs').on('value', snap => {
@@ -225,7 +224,6 @@
                 list.forEach((item, i) => {
                     tbody.innerHTML += `<tr><td>${i+1}</td><td>${item.cabNo || ''}</td><td>${item.time || ''}</td><td>${item.driver||'N/A'}</td><td>${item.locations || ''}</td></tr>`;
                 });
-                loadMasterDataForDate();
             });
         }
 
@@ -259,7 +257,8 @@
 
         function saveParking() {
             let rawVeh = document.getElementById('p-veh-no').value.trim();
-            if(!rawVeh) { alert('Enter Vehicle Number!'); return; }
+            if(!rawVeh) { alert('Please enter Vehicle Number!'); return; }
+            
             let entry = {
                 dateKey: new Date().toISOString().split('T')[0],
                 dateTime: document.getElementById('p-datetime').value,
@@ -270,19 +269,24 @@
                 mobile: document.getElementById('p-mobile').value,
                 slot: document.getElementById('p-slot').value
             };
-            db.ref('idfc_parking').push(entry);
-            document.getElementById('p-veh-no').value = '';
-            document.getElementById('p-staff-id').value = '';
-            document.getElementById('p-staff-name').value = '';
-            document.getElementById('p-mobile').value = '';
-            document.getElementById('p-slot').value = '';
-            resetAutoTimes();
-            alert('Parking saved successfully!');
+
+            db.ref('idfc_parking').push(entry).then(() => {
+                alert('Parking entry saved successfully!');
+                document.getElementById('p-veh-no').value = '';
+                document.getElementById('p-staff-id').value = '';
+                document.getElementById('p-staff-name').value = '';
+                document.getElementById('p-mobile').value = '';
+                document.getElementById('p-slot').value = '';
+                resetAutoTimes();
+            }).catch(error => {
+                alert('Failed to save: ' + error.message);
+            });
         }
 
         function saveCab() {
             let rawCab = document.getElementById('cab-no').value.trim();
-            if(!rawCab) { alert('Enter Cab Number!'); return; }
+            if(!rawCab) { alert('Please enter Cab Number!'); return; }
+            
             let entry = {
                 dateKey: new Date().toISOString().split('T')[0],
                 cabNo: formatVehicleNumber(rawCab),
@@ -290,12 +294,16 @@
                 driver: document.getElementById('cab-driver').value,
                 locations: document.getElementById('cab-locations').value
             };
-            db.ref('idfc_cabs').push(entry);
-            document.getElementById('cab-no').value = '';
-            document.getElementById('cab-driver').value = '';
-            document.getElementById('cab-locations').value = '';
-            resetAutoTimes();
-            alert('Cab saved successfully!');
+
+            db.ref('idfc_cabs').push(entry).then(() => {
+                alert('Cab entry saved successfully!');
+                document.getElementById('cab-no').value = '';
+                document.getElementById('cab-driver').value = '';
+                document.getElementById('cab-locations').value = '';
+                resetAutoTimes();
+            }).catch(error => {
+                alert('Failed to save: ' + error.message);
+            });
         }
 
         function loadMasterDataForDate() {
