@@ -78,6 +78,13 @@
         .whatsapp-btn:hover {
             background-color: #1EBE5D;
         }
+        .danger-btn {
+            background-color: #dc3545;
+            margin-top: 10px;
+        }
+        .danger-btn:hover {
+            background-color: #bd2130;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -177,6 +184,10 @@
             <select id="p-type"><option>Bike</option><option>Car</option></select>
         </div>
         <div class="form-group">
+            <label>Date & Time (Auto-Filled, Editable)</label>
+            <input type="text" id="p-datetime" placeholder="DD/MM/YYYY HH:MM">
+        </div>
+        <div class="form-group">
             <label>Vehicle Number (Auto-Fill / Any Format)</label>
             <input type="text" id="p-veh-no" placeholder="e.g. mh01ab6229 or MH 01 AB 6229" onkeyup="autoFillParking(this.value)">
         </div>
@@ -210,7 +221,10 @@
             <label>Cab Vehicle Number (Auto-Fill)</label>
             <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531" onkeyup="autoFillCab(this.value)">
         </div>
-        <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" placeholder="23:55"></div>
+        <div class="form-group">
+            <label>Timing (HH:MM) (Auto-Filled, Editable)</label>
+            <input type="text" id="cab-time" placeholder="HH:MM">
+        </div>
         <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" placeholder="Driver Name"></div>
         <div class="form-group"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-locations" placeholder="Ulhasnagar, Vashi, Panvel..."></div>
         <button onclick="saveCab()">💾 Save Cab Entry</button>
@@ -234,7 +248,7 @@
     <!-- 5. Master Report & Historical Search Section -->
     <div class="section-box tab-section" id="sec-master">
         <h3>🔍 5. Master Report & Historical Date Search (Old Data)</h3>
-        <p style="font-size: 13px; color: #666;">Select any past date (even months old) to view or search records for that specific day:</p>
+        <p style="font-size: 13px; color: #666;">Select any past date to view or search records for that specific day:</p>
         <div class="form-group">
             <label>Select Report Date</label>
             <input type="date" id="master-date-picker" onchange="loadMasterDataForDate()">
@@ -243,10 +257,13 @@
         <div id="master-results" style="margin-top: 15px;">
             <!-- Dynamic historical data will load here -->
         </div>
+
+        <button class="whatsapp-btn" onclick="shareMasterWhatsApp()">📤 Share Master Report on WhatsApp</button>
+        <button class="danger-btn" onclick="clearAllData()">🗑️ Clear All Stored Data</button>
     </div>
 
     <script>
-        // Real-time Clock in Header
+        // Real-time Clock in Header & Default Auto-Time fields initialization
         setInterval(() => {
             const now = new Date();
             document.getElementById('current-time').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
@@ -258,11 +275,35 @@
             loadParkingData();
             loadCabData();
             
+            // Set default datetime for parking & cab fields
+            resetAutoTimes();
+
             // Set default date picker to today in Master tab
             const todayISO = new Date().toISOString().split('T')[0];
             document.getElementById('master-date-picker').value = todayISO;
             loadMasterDataForDate();
+
+            // Listen for storage changes across tabs/devices (Real-time sync simulation)
+            window.addEventListener('storage', function(e) {
+                loadHeadcount();
+                loadSecurity();
+                loadParkingData();
+                loadCabData();
+                loadMasterDataForDate();
+            });
         };
+
+        function resetAutoTimes() {
+            const now = new Date();
+            const formattedDT = String(now.getDate()).padStart(2, '0') + '/' + 
+                                String(now.getMonth() + 1).padStart(2, '0') + '/' + 
+                                now.getFullYear() + ' ' + 
+                                String(now.getHours()).padStart(2, '0') + ':' + 
+                                String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('p-datetime').value = formattedDT;
+            document.getElementById('cab-time').value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        }
 
         // Tab Switching for Mobile Ease
         function switchTab(tab) {
@@ -287,7 +328,6 @@
             return clean;
         }
 
-        // Helper to get formatted date string DD/MM/YYYY from Date object or ISO string
         function getFormattedDate(dateObj = new Date()) {
             return String(dateObj.getDate()).padStart(2, '0') + '/' + 
                    String(dateObj.getMonth() + 1).padStart(2, '0') + '/' + 
@@ -322,6 +362,7 @@
             localStorage.setItem('idfc_headcount_' + dateKey, JSON.stringify(data));
 
             alert('Headcount saved successfully!');
+            loadMasterDataForDate();
         }
 
         function loadHeadcount() {
@@ -391,7 +432,6 @@
 
         function shareSecurityWhatsApp() {
             const todayDate = getFormattedDate();
-            
             const text = `*Date:-${todayDate}*\n` +
                          `*Security Report - ${document.getElementById('sec-shift').value}*\n\n` +
                          `1) ${document.getElementById('rec-1').value} (Rece-01)\n` +
@@ -421,6 +461,7 @@
 
         function saveParking() {
             const type = document.getElementById('p-type').value;
+            const customDateTime = document.getElementById('p-datetime').value.trim();
             const rawVehNo = document.getElementById('p-veh-no').value.trim();
             const staffId = document.getElementById('p-staff-id').value;
             const staffName = document.getElementById('p-staff-name').value;
@@ -434,8 +475,8 @@
 
             const vehicleNo = formatVehicleNumber(rawVehNo);
             const now = new Date();
-            const dateTimeStr = getFormattedDate(now) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const dateKey = now.toISOString().split('T')[0];
+            const dateTimeStr = customDateTime || (getFormattedDate(now) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
             let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
 
@@ -453,12 +494,14 @@
             parkingList.unshift(newEntry);
             localStorage.setItem('idfc_parking', JSON.stringify(parkingList));
             loadParkingData();
+            loadMasterDataForDate();
 
             document.getElementById('p-veh-no').value = '';
             document.getElementById('p-staff-id').value = '';
             document.getElementById('p-staff-name').value = '';
             document.getElementById('p-mobile').value = '';
             document.getElementById('p-slot').value = '';
+            resetAutoTimes();
             alert('Parking entry saved successfully!');
         }
 
@@ -530,11 +573,12 @@
 
             localStorage.setItem('idfc_cabs', JSON.stringify(cabList));
             loadCabData();
+            loadMasterDataForDate();
 
             document.getElementById('cab-no').value = '';
-            document.getElementById('cab-time').value = '';
             document.getElementById('cab-driver').value = '';
             document.getElementById('cab-locations').value = '';
+            resetAutoTimes();
             alert('Cab entry saved successfully!');
         }
 
@@ -577,7 +621,7 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Master Report Historical Date Search
+        // Master Report Historical Date Search & WhatsApp Share
         function loadMasterDataForDate() {
             const selectedISO = document.getElementById('master-date-picker').value;
             if (!selectedISO) return;
@@ -629,6 +673,69 @@
             }
 
             document.getElementById('master-results').innerHTML = html;
+        }
+
+        function shareMasterWhatsApp() {
+            const selectedISO = document.getElementById('master-date-picker').value;
+            if (!selectedISO) return;
+
+            let parts = selectedISO.split('-');
+            const displayDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+
+            const headcountArch = JSON.parse(localStorage.getItem('idfc_headcount_' + selectedISO));
+            const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            const filteredParking = parkingList.filter(p => p.dateKey === selectedISO);
+            const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            const filteredCabs = cabList.filter(c => c.dateKey === selectedISO);
+
+            let text = `*Master Operations Report - ${displayDate}*\n` +
+                       `*Airoli Gigaplex Building NO-09*\n\n`;
+
+            if (headcountArch) {
+                let totalHC = parseInt(headcountArch.onRoll) + parseInt(headcountArch.offRoll) + parseInt(headcountArch.secDuty) + parseInt(headcountArch.hkStaff) + parseInt(headcountArch.techStaff) + parseInt(headcountArch.cafeStaff);
+                text += `*Headcount Summary:*\n` +
+                        `- On Roll: ${headcountArch.onRoll} | Off Roll: ${headcountArch.offRoll}\n` +
+                        `- Security: ${headcountArch.secDuty} | HK: ${headcountArch.hkStaff} | Tech: ${headcountArch.techStaff} | Cafe: ${headcountArch.cafeStaff}\n` +
+                        `*Total Head Count: ${totalHC}*\n\n`;
+            } else {
+                text += `*Headcount Summary:* No records saved.\n\n`;
+            }
+
+            text += `*Parking Entries (${filteredParking.length}):*\n`;
+            if (filteredParking.length > 0) {
+                filteredParking.forEach((p, i) => {
+                    text += `${i+1}) ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'} [Slot: ${p.slot}]\n`;
+                });
+            } else {
+                text += `No parking records.\n`;
+            }
+
+            text += `\n*Cab Entries (${filteredCabs.length}):*\n`;
+            if (filteredCabs.length > 0) {
+                filteredCabs.forEach((c, i) => {
+                    text += `${i+1}) Cab: ${c.cabNo} (${c.time}) - ${c.driver}\nRoutes: ${c.locations}\n`;
+                });
+            } else {
+                text += `No cab records.\n`;
+            }
+
+            text += `\n*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
+
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // Clear All Stored Data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all saved records, parking, and cab logs? This action cannot be undone.')) {
+                localStorage.clear();
+                loadHeadcount();
+                loadSecurity();
+                loadParkingData();
+                loadCabData();
+                loadMasterDataForDate();
+                alert('All data has been cleared successfully.');
+            }
         }
     </script>
 </body>
