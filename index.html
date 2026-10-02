@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IDFC Security & Operations Dashboard</title>
     
-    <!-- Firebase App (Core) SDK -->
+    <!-- Firebase App & Realtime Database SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <!-- Firebase Realtime Database SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
@@ -195,7 +194,7 @@
         </div>
         <div class="form-group">
             <label>Vehicle Number (Auto-Fill / Any Format)</label>
-            <input type="text" id="p-veh-no" placeholder="e.g. mh01ab6229 or MH 01 AB 6229" onkeyup="autoFillParking(this.value)">
+            <input type="text" id="p-veh-no" placeholder="e.g. mh01ab6229 or MH 01 AB 6229">
         </div>
         <div class="form-group"><label>Staff ID</label><input type="text" id="p-staff-id" placeholder="Staff ID"></div>
         <div class="form-group"><label>Staff Name</label><input type="text" id="p-staff-name" placeholder="Full Name"></div>
@@ -225,7 +224,7 @@
         <h3>🚐 4. Staff Night Cab Report</h3>
         <div class="form-group">
             <label>Cab Vehicle Number (Auto-Fill)</label>
-            <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531" onkeyup="autoFillCab(this.value)">
+            <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531">
         </div>
         <div class="form-group">
             <label>Timing (HH:MM) (Auto-Filled, Editable)</label>
@@ -256,7 +255,6 @@
         <h3>🔍 5. Master Report & Historical Date Search (Old Data)</h3>
         <p style="font-size: 13px; color: #666;">Select any past date (up to 2 months) to view or search records:</p>
         
-        <!-- Clear Data Button Placed Safely Here -->
         <button class="danger-btn" onclick="clearTodayData()" style="margin-bottom: 12px;">🗑️ Clear Today's Data</button>
 
         <div class="form-group">
@@ -264,32 +262,28 @@
             <input type="date" id="master-date-picker" onchange="loadMasterDataForDate()">
         </div>
         
-        <div id="master-results" style="margin-top: 15px;">
-            <!-- Dynamic historical data will load here -->
-        </div>
+        <div id="master-results" style="margin-top: 15px;"></div>
 
         <button class="whatsapp-btn" onclick="shareMasterWhatsApp()">📤 Share Master Report on WhatsApp</button>
     </div>
 
     <script>
-        // ================= FIREBASE CONFIGURATION =================
-        // Apni Firebase console ki details yahan daalein:
+        // ================= FIREBASE CONFIGURATION (Aapki Exact Details) =================
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyD4I6va-3n2f1gMYFWibW55lHWNfVwsS84",
+            authDomain: "idfc-security.firebaseapp.com",
+            databaseURL: "https://idfc-security-default-rtdb.firebaseio.com",
+            projectId: "idfc-security",
+            storageBucket: "idfc-security.firebasestorage.app",
+            messagingSenderId: "887222367596",
+            appId: "1:887222367596:web:9cda679105a0010c8caf49"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        // ==========================================================
+        // ===============================================================================
 
-        // Real-time Clock in Header
         setInterval(() => {
             const now = new Date();
             document.getElementById('current-time').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
@@ -297,12 +291,8 @@
 
         window.onload = function() {
             resetAutoTimes();
-            
-            // Set default date picker to today in Master tab
             const todayISO = new Date().toISOString().split('T')[0];
             document.getElementById('master-date-picker').value = todayISO;
-
-            // Fetch live data listeners from Firebase
             initRealtimeListeners();
         };
 
@@ -318,7 +308,6 @@
             document.getElementById('cab-time').value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
         }
 
-        // Tab Switching for Mobile Ease
         function switchTab(tab) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('hidden'));
             ['all', 'headcount', 'security', 'parking', 'cab', 'master'].forEach(t => document.getElementById('btn-' + t).classList.remove('active'));
@@ -346,7 +335,6 @@
                    dateObj.getFullYear();
         }
 
-        // Headcount Calculation
         const headcountInputs = ['on-roll', 'off-roll', 'sec-duty', 'hk-staff', 'tech-staff', 'cafe-staff'];
         headcountInputs.forEach(id => {
             document.getElementById(id).addEventListener('input', calculateTotal);
@@ -357,11 +345,7 @@
             document.getElementById('total-headcount').innerText = total;
         }
 
-        // Real-time Listeners across all devices
         function initRealtimeListeners() {
-            const dateKey = new Date().toISOString().split('T')[0];
-
-            // Live Headcount Sync
             db.ref('idfc_headcount').on('value', (snapshot) => {
                 const saved = snapshot.val();
                 if (saved) {
@@ -376,7 +360,6 @@
                 }
             });
 
-            // Live Security Sync
             db.ref('idfc_security').on('value', (snapshot) => {
                 const saved = snapshot.val();
                 if (saved) {
@@ -388,30 +371,21 @@
                 }
             });
 
-            // Live Parking Records Sync
             db.ref('idfc_parking').on('value', (snapshot) => {
                 const data = snapshot.val();
-                let parkingList = [];
-                if (data) {
-                    parkingList = Object.values(data).reverse(); // Latest on top
-                }
+                let parkingList = data ? Object.values(data).reverse() : [];
                 loadParkingTable(parkingList);
                 loadMasterDataForDate();
             });
 
-            // Live Cab Records Sync
             db.ref('idfc_cabs').on('value', (snapshot) => {
                 const data = snapshot.val();
-                let cabList = [];
-                if (data) {
-                    cabList = Object.values(data).reverse();
-                }
+                let cabList = data ? Object.values(data).reverse() : [];
                 loadCabTable(cabList);
                 loadMasterDataForDate();
             });
         }
 
-        // Save Functions to Firebase
         function saveHeadcount() {
             const data = {
                 onRoll: document.getElementById('on-roll').value,
@@ -427,8 +401,7 @@
             
             db.ref('idfc_headcount').set(data);
             db.ref('history_headcount/' + dateKey).set(data);
-
-            alert('Headcount saved successfully & synced live!');
+            alert('Headcount saved & synced live!');
         }
 
         function saveSecurity() {
@@ -463,17 +436,7 @@
             const dateKey = now.toISOString().split('T')[0];
             const dateTimeStr = customDateTime || (getFormattedDate(now) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
-            const newEntry = {
-                dateKey: dateKey,
-                dateTime: dateTimeStr,
-                type: type,
-                vehicleNo: vehicleNo,
-                staffId: staffId,
-                staffName: staffName,
-                mobile: mobile,
-                slot: slot
-            };
-
+            const newEntry = { dateKey, dateTime, type, vehicleNo, staffId, staffName, mobile, slot };
             db.ref('idfc_parking').push(newEntry);
 
             document.getElementById('p-veh-no').value = '';
@@ -541,7 +504,6 @@
             });
         }
 
-        // Master Report & History Search (Retains up to 2 months via Firebase)
         function loadMasterDataForDate() {
             const selectedISO = document.getElementById('master-date-picker').value;
             if (!selectedISO) return;
@@ -554,17 +516,11 @@
                 
                 db.ref('idfc_parking').once('value').then((pSnapshot) => {
                     const pData = pSnapshot.val();
-                    let filteredParking = [];
-                    if (pData) {
-                        filteredParking = Object.values(pData).filter(p => p.dateKey === selectedISO);
-                    }
+                    let filteredParking = pData ? Object.values(pData).filter(p => p.dateKey === selectedISO) : [];
 
                     db.ref('idfc_cabs').once('value').then((cSnapshot) => {
                         const cData = cSnapshot.val();
-                        let filteredCabs = [];
-                        if (cData) {
-                            filteredCabs = Object.values(cData).filter(c => c.dateKey === selectedISO);
-                        }
+                        let filteredCabs = cData ? Object.values(cData).filter(c => c.dateKey === selectedISO) : [];
 
                         let html = `<h4>📊 Summary for Date: ${displayDate}</h4>`;
 
@@ -658,7 +614,6 @@
             });
         }
 
-        // WhatsApp Share for individual sections
         function shareHeadcountWhatsApp() {
             const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
@@ -726,12 +681,10 @@
             });
         }
 
-        // Clear Today's Dynamic Logs Button
         function clearTodayData() {
-            if (confirm('Kya aap aaj ki parking aur cab entries ko clear karna chahte hain? Purana 2 mahine ka data safe rahega.')) {
+            if (confirm('Kya aap aaj ki parking aur cab entries ko clear karna chahte hain? Purana data safe rahega.')) {
                 const todayISO = new Date().toISOString().split('T')[0];
                 
-                // Clear today's parking entries from Firebase
                 db.ref('idfc_parking').once('value').then((snapshot) => {
                     const data = snapshot.val();
                     if (data) {
@@ -743,7 +696,6 @@
                     }
                 });
 
-                // Clear today's cab entries from Firebase
                 db.ref('idfc_cabs').once('value').then((snapshot) => {
                     const data = snapshot.val();
                     if (data) {
