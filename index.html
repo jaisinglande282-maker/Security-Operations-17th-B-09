@@ -282,7 +282,7 @@
             let clean = inputStr.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             let match = clean.match(/^([A-Z]{2})(\d{2})([A-Z]{1,2})(\d{4})$/);
             if (match) {
-                return ${match[1]} ${match[2]} ${match[3]} ${match[4]};
+                return `${match[1]} ${match[2]} ${match[3]} ${match[4]}`;
             }
             return clean;
         }
@@ -343,19 +343,19 @@
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
             const totalCount = document.getElementById('total-headcount').innerText;
 
-            const text = *Headcount-${todayDate}*\n +
-                         *Airoli Gigaplex Building NO-09*\n +
-                         1] On roll Employee:-${document.getElementById('on-roll').value}\n +
-                         2] Off roll Employee:-${document.getElementById('off-roll').value}\n +
-                         3] Security duty on:-${document.getElementById('sec-duty').value}\n +
-                         4] H K staff on duty:-${document.getElementById('hk-staff').value}\n +
-                         5] Technical staff:-${document.getElementById('tech-staff').value}\n +
-                         6] Cafeteria staff:-${document.getElementById('cafe-staff').value}\n +
-                         Total head count:-${totalCount}\n\n +
-                         *Regards,*\n +
-                         *IDFC First bank*\n +
-                         *Airoli Gigaplex Building NO-09*\n +
-                         *(${senderName})*;
+            const text = `*Headcount-${todayDate}*\n` +
+                         `*Airoli Gigaplex Building NO-09*\n` +
+                         `1] On roll Employee:-${document.getElementById('on-roll').value}\n` +
+                         `2] Off roll Employee:-${document.getElementById('off-roll').value}\n` +
+                         `3] Security duty on:-${document.getElementById('sec-duty').value}\n` +
+                         `4] H K staff on duty:-${document.getElementById('hk-staff').value}\n` +
+                         `5] Technical staff:-${document.getElementById('tech-staff').value}\n` +
+                         `6] Cafeteria staff:-${document.getElementById('cafe-staff').value}\n` +
+                         `Total head count:-${totalCount}\n\n` +
+                         `*Regards,*\n` +
+                         `*IDFC First bank*\n` +
+                         `*Airoli Gigaplex Building NO-09*\n` +
+                         `*(${senderName})*`;
 
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
@@ -392,13 +392,13 @@
         function shareSecurityWhatsApp() {
             const todayDate = getFormattedDate();
             
-            const text = *Date:-${todayDate}*\n +
-                         *Security Report - ${document.getElementById('sec-shift').value}*\n\n +
-                         1) ${document.getElementById('rec-1').value} (Rece-01)\n +
-                         2) ${document.getElementById('rec-2').value} (Rece-02)\n +
-                         3) ${document.getElementById('ptl-sec').value} (PTL)\n +
-                         4) ${document.getElementById('bms-sec').value} (BMS)\n\n +
-                         *Airoli B-09 Floor 17th*;
+            const text = `*Date:-${todayDate}*\n` +
+                         `*Security Report - ${document.getElementById('sec-shift').value}*\n\n` +
+                         `1) ${document.getElementById('rec-1').value} (Rece-01)\n` +
+                         `2) ${document.getElementById('rec-2').value} (Rece-02)\n` +
+                         `3) ${document.getElementById('ptl-sec').value} (PTL)\n` +
+                         `4) ${document.getElementById('bms-sec').value} (BMS)\n\n` +
+                         `*Airoli B-09 Floor 17th*`;
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
@@ -485,12 +485,12 @@
             const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
 
-            let text = *Staff Parking Report - ${todayDate}*\n\n;
+            let text = `*Staff Parking Report - ${todayDate}*\n\n`;
             parkingList.forEach((item, i) => {
                 let typeShort = item.type === 'Bike' ? 'B' : 'C';
-                text += ${i + 1}.${item.vehicleNo} (${typeShort}) ${item.staffName || 'N/A'}\n;
+                text += `${i + 1}.${item.vehicleNo} (${typeShort}) ${item.staffName || 'N/A'}\n`;
             });
-            text += \n*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*;
+            text += `\n*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
 
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
@@ -560,19 +560,19 @@
             const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
             
-            let text = *Staff Night Cab Report - ${todayDate}*\n\n;
+            let text = `*Staff Night Cab Report - ${todayDate}*\n\n`;
             
             if (cabList.length === 0) {
-                text += 1)MH 05 FJ 2531(23:55)Datta Bhau\n +
-                        1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n;
+                text += `1)MH 05 FJ 2531(23:55)Datta Bhau\n` +
+                        `1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n`;
             } else {
                 cabList.forEach((item, i) => {
-                    let locs = item.locations.split(',').map((l, idx) => ${idx + 1})${l.trim()}).join(' ');
-                    text += ${i + 1})${item.cabNo}(${item.time})${item.driver}\n${locs}\n\n;
+                    let locs = item.locations.split(',').map((l, idx) => `${idx + 1})${l.trim()}`).join(' ');
+                    text += `${i + 1})${item.cabNo}(${item.time})${item.driver}\n${locs}\n\n`;
                 });
             }
 
-            text += *Airoli B-09 Floor 17th*\n*Report By: ${senderName}*;
+            text += `*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
 
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
@@ -592,7 +592,7 @@
             const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
             const filteredCabs = cabList.filter(c => c.dateKey === selectedISO);
 
-            let html = <h4>📊 Summary for Date: ${displayDate}</h4>;
+            let html = `<h4>📊 Summary for Date: ${displayDate}</h4>`;
 
             if (headcountArch) {
                 let totalHC = parseInt(headcountArch.onRoll) + parseInt(headcountArch.offRoll) + parseInt(headcountArch.secDuty) + parseInt(headcountArch.hkStaff) + parseInt(headcountArch.techStaff) + parseInt(headcountArch.cafeStaff);
@@ -603,29 +603,29 @@
                     <strong>Total Head Count: ${totalHC}</strong>
                 </div>`;
             } else {
-                html += <p style="color:#888;">No Headcount saved for ${displayDate}.</p>;
+                html += `<p style="color:#888;">No Headcount saved for ${displayDate}.</p>`;
             }
 
-            html += <h5>🚘 Parking Entries (${filteredParking.length})</h5>;
+            html += `<h5>🚘 Parking Entries (${filteredParking.length})</h5>`;
             if (filteredParking.length > 0) {
-                html += <ul>;
+                html += `<ul>`;
                 filteredParking.forEach(p => {
-                    html += <li>${p.dateTime} - ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'} (Slot: ${p.slot})</li>;
+                    html += `<li>${p.dateTime} - ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'} (Slot: ${p.slot})</li>`;
                 });
-                html += </ul>;
+                html += `</ul>`;
             } else {
-                html += <p style="color:#888;">No parking entries found for this date.</p>;
+                html += `<p style="color:#888;">No parking entries found for this date.</p>`;
             }
 
-            html += <h5>🚐 Cab Entries (${filteredCabs.length})</h5>;
+            html += `<h5>🚐 Cab Entries (${filteredCabs.length})</h5>`;
             if (filteredCabs.length > 0) {
-                html += <ul>;
+                html += `<ul>`;
                 filteredCabs.forEach(c => {
-                    html += <li>Cab: ${c.cabNo} (${c.time}) - Driver: ${c.driver} | Routes: ${c.locations}</li>;
+                    html += `<li>Cab: ${c.cabNo} (${c.time}) - Driver: ${c.driver} | Routes: ${c.locations}</li>`;
                 });
-                html += </ul>;
+                html += `</ul>`;
             } else {
-                html += <p style="color:#888;">No cab entries found for this date.</p>;
+                html += `<p style="color:#888;">No cab entries found for this date.</p>`;
             }
 
             document.getElementById('master-results').innerHTML = html;
