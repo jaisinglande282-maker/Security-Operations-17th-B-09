@@ -4,30 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IDFC Security & Operations Dashboard</title>
-    
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 10px; color: #333; }
-        .header { background-color: #0b4632; color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
-        .app-title { font-size: 20px; font-weight: bold; margin: 0 0 5px 0; text-transform: uppercase; }
-        .section-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h3 { color: #0b4632; margin-top: 0; font-size: 18px; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 13px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        button { background-color: #0b4632; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; font-size: 14px; }
-        .whatsapp-btn { background-color: #25D366; margin-top: 10px; }
-        .danger-btn { background-color: #dc3545; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; display: block; overflow-x: auto; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 13px; }
-        th { background-color: #0b4632; color: white; }
-        .tab-buttons { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
-        .tab-buttons button { background-color: #6c757d; font-size: 12px; padding: 8px 5px; flex: 1; }
-        .tab-buttons button.active { background-color: #0b4632; }
-        .hidden { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+        .header {
+            background-color: #0b4632;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .app-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .section-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        h2, h3 {
+            color: #0b4632;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background-color: #0b4632;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #083324;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            margin-top: 10px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1EBE5D;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            overflow-x: auto;
+            display: block;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 13px;
+        }
+        th {
+            background-color: #0b4632;
+            color: white;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .tab-buttons button {
+            background-color: #6c757d;
+            font-size: 12px;
+            padding: 8px 5px;
+            flex: 1;
+        }
+        .tab-buttons button.active {
+            background-color: #0b4632;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -37,7 +122,7 @@
         <p style="font-size: 12px; margin: 5px 0 0 0;">Airoli Gigaplex Building NO-09 | <span id="current-time"></span></p>
     </div>
 
-    <!-- Duty Selection Tabs -->
+    <!-- Mobile Duty Selection Tabs -->
     <div class="section-box" style="background: #e9ecef; padding: 10px;">
         <label>📱 Select Duty / Section to Work On:</label>
         <div class="tab-buttons">
@@ -70,7 +155,11 @@
         <h3>🛡️ 2. Security Postings Allocation</h3>
         <div class="form-group">
             <label>Select Shift</label>
-            <select id="sec-shift"><option>2nd Shift</option><option>1st Shift</option><option>3rd Shift</option></select>
+            <select id="sec-shift">
+                <option>2nd Shift</option>
+                <option>1st Shift</option>
+                <option>3rd Shift</option>
+            </select>
         </div>
         <div class="form-group"><label>Reception 01</label><input type="text" id="rec-1" value="santosh kadam"></div>
         <div class="form-group"><label>Reception 02</label><input type="text" id="rec-2" value="Ranubai Gavade"></div>
@@ -83,9 +172,14 @@
     <!-- 3. Parking Entry Form -->
     <div class="section-box tab-section" id="sec-parking">
         <h3>🚘 3. Staff Car & Bike Parking Entry Form</h3>
-        <div class="form-group"><label>Vehicle Type</label><select id="p-type"><option>Car</option><option>Bike</option></select></div>
-        <div class="form-group"><label>Date & Time</label><input type="text" id="p-datetime"></div>
-        <div class="form-group"><label>Vehicle Number</label><input type="text" id="p-veh-no" placeholder="e.g. MH01AB6229"></div>
+        <div class="form-group">
+            <label>Vehicle Type</label>
+            <select id="p-type"><option>Bike</option><option>Car</option></select>
+        </div>
+        <div class="form-group">
+            <label>Vehicle Number (Auto-Fill / Any Format)</label>
+            <input type="text" id="p-veh-no" placeholder="e.g. mh01ab6229 or MH 01 AB 6229" onkeyup="autoFillParking(this.value)">
+        </div>
         <div class="form-group"><label>Staff ID</label><input type="text" id="p-staff-id" placeholder="Staff ID"></div>
         <div class="form-group"><label>Staff Name</label><input type="text" id="p-staff-name" placeholder="Full Name"></div>
         <div class="form-group"><label>Mobile</label><input type="text" id="p-mobile" placeholder="Mobile Number"></div>
@@ -94,7 +188,16 @@
         
         <h4>Parking Records</h4>
         <table>
-            <thead><tr><th>Sr</th><th>Date & Time</th><th>Type</th><th>Vehicle No</th><th>Staff</th><th>Slot</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Sr</th>
+                    <th>Date & Time</th>
+                    <th>Type</th>
+                    <th>Vehicle No</th>
+                    <th>Staff</th>
+                    <th>Slot</th>
+                </tr>
+            </thead>
             <tbody id="parking-table-body"></tbody>
         </table>
         <button class="whatsapp-btn" onclick="shareParkingWhatsApp()">📤 Share Parking Report on WhatsApp</button>
@@ -103,64 +206,69 @@
     <!-- 4. Staff Night Cab Report -->
     <div class="section-box tab-section" id="sec-cab">
         <h3>🚐 4. Staff Night Cab Report</h3>
-        <div class="form-group"><label>Cab Vehicle Number</label><input type="text" id="cab-no" placeholder="e.g. MH05FJ2531"></div>
-        <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time"></div>
+        <div class="form-group">
+            <label>Cab Vehicle Number (Auto-Fill)</label>
+            <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531" onkeyup="autoFillCab(this.value)">
+        </div>
+        <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" placeholder="23:55"></div>
         <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" placeholder="Driver Name"></div>
-        <div class="form-group"><label>Drop Locations</label><input type="text" id="cab-locations" placeholder="Ulhasnagar, Vashi..."></div>
+        <div class="form-group"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-locations" placeholder="Ulhasnagar, Vashi, Panvel..."></div>
         <button onclick="saveCab()">💾 Save Cab Entry</button>
 
         <h4>Cab Records</h4>
         <table>
-            <thead><tr><th>Sr</th><th>Cab No</th><th>Time</th><th>Driver</th><th>Locations</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Sr</th>
+                    <th>Cab No</th>
+                    <th>Time</th>
+                    <th>Driver</th>
+                    <th>Locations</th>
+                </tr>
+            </thead>
             <tbody id="cab-table-body"></tbody>
         </table>
         <button class="whatsapp-btn" onclick="shareCabWhatsApp()">📤 Share Cab Report on WhatsApp</button>
     </div>
 
-    <!-- 5. Master Report -->
+    <!-- 5. Master Report & Historical Search Section -->
     <div class="section-box tab-section" id="sec-master">
-        <h3>🔍 5. Master Report & Historical Date Search</h3>
-        <button class="danger-btn" onclick="clearTodayData()" style="margin-bottom: 12px;">🗑️ Clear Today's Data</button>
-        <div class="form-group"><label>Select Report Date</label><input type="date" id="master-date-picker" onchange="loadMasterDataForDate()"></div>
-        <div id="master-results" style="margin-top: 15px;"></div>
-        <button class="whatsapp-btn" onclick="shareMasterWhatsApp()">📤 Share Master Report on WhatsApp</button>
+        <h3>🔍 5. Master Report & Historical Date Search (Old Data)</h3>
+        <p style="font-size: 13px; color: #666;">Select any past date (even months old) to view or search records for that specific day:</p>
+        <div class="form-group">
+            <label>Select Report Date</label>
+            <input type="date" id="master-date-picker" onchange="loadMasterDataForDate()">
+        </div>
+        
+        <div id="master-results" style="margin-top: 15px;">
+            <!-- Dynamic historical data will load here -->
+        </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD4I6va-3n2f1gMYFWibW55lHWNfVwsS84",
-            authDomain: "idfc-security.firebaseapp.com",
-            databaseURL: "https://idfc-security-default-rtdb.firebaseio.com",
-            projectId: "idfc-security",
-            storageBucket: "idfc-security.firebasestorage.app",
-            messagingSenderId: "887222367596",
-            appId: "1:887222367596:web:9cda679105a0010c8caf49"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
+        // Real-time Clock in Header
         setInterval(() => {
             const now = new Date();
             document.getElementById('current-time').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
         }, 1000);
 
         window.onload = function() {
-            resetAutoTimes();
-            document.getElementById('master-date-picker').value = new Date().toISOString().split('T')[0];
-            initRealtimeListeners();
+            loadHeadcount();
+            loadSecurity();
+            loadParkingData();
+            loadCabData();
+            
+            // Set default date picker to today in Master tab
+            const todayISO = new Date().toISOString().split('T')[0];
+            document.getElementById('master-date-picker').value = todayISO;
+            loadMasterDataForDate();
         };
 
-        function resetAutoTimes() {
-            const now = new Date();
-            const dt = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('p-datetime').value = dt;
-            document.getElementById('cab-time').value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        }
-
+        // Tab Switching for Mobile Ease
         function switchTab(tab) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('hidden'));
             ['all', 'headcount', 'security', 'parking', 'cab', 'master'].forEach(t => document.getElementById('btn-' + t).classList.remove('active'));
+
             if (tab !== 'all') {
                 document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById('sec-' + tab).classList.remove('hidden');
@@ -168,245 +276,359 @@
             document.getElementById('btn-' + tab).classList.add('active');
         }
 
-        function formatVehicleNumber(str) {
-            if (!str) return '';
-            let clean = str.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            let m = clean.match(/^([A-Z]{2})(\d{2})([A-Z]{1,2})(\d{4})$/);
-            return m ? `${m[1]} ${m[2]} ${m[3]} ${m[4]}` : clean;
+        // Helper to format vehicle number properly (e.g., MH 01 AB 6229)
+        function formatVehicleNumber(inputStr) {
+            if (!inputStr) return '';
+            let clean = inputStr.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            let match = clean.match(/^([A-Z]{2})(\d{2})([A-Z]{1,2})(\d{4})$/);
+            if (match) {
+                return ${match[1]} ${match[2]} ${match[3]} ${match[4]};
+            }
+            return clean;
         }
 
-        const hcInputs = ['on-roll', 'off-roll', 'sec-duty', 'hk-staff', 'tech-staff', 'cafe-staff'];
-        hcInputs.forEach(id => document.getElementById(id).addEventListener('input', () => {
-            let total = hcInputs.reduce((sum, i) => sum + (parseInt(document.getElementById(i).value) || 0), 0);
+        // Helper to get formatted date string DD/MM/YYYY from Date object or ISO string
+        function getFormattedDate(dateObj = new Date()) {
+            return String(dateObj.getDate()).padStart(2, '0') + '/' + 
+                   String(dateObj.getMonth() + 1).padStart(2, '0') + '/' + 
+                   dateObj.getFullYear();
+        }
+
+        // Headcount Logic
+        const headcountInputs = ['on-roll', 'off-roll', 'sec-duty', 'hk-staff', 'tech-staff', 'cafe-staff'];
+        headcountInputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateTotal);
+        });
+
+        function calculateTotal() {
+            let total = headcountInputs.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
             document.getElementById('total-headcount').innerText = total;
-        }));
-
-        function initRealtimeListeners() {
-            db.ref('idfc_headcount').on('value', snap => {
-                let d = snap.val();
-                if(d) {
-                    document.getElementById('on-roll').value = d.onRoll || 415;
-                    document.getElementById('off-roll').value = d.offRoll || 33;
-                    document.getElementById('sec-duty').value = d.secDuty || 3;
-                    document.getElementById('hk-staff').value = d.hkStaff || 8;
-                    document.getElementById('tech-staff').value = d.techStaff || 2;
-                    document.getElementById('cafe-staff').value = d.cafeStaff || 55;
-                    document.getElementById('sender-name').value = d.sender || 'Jaysing Lande';
-                }
-            });
-
-            db.ref('idfc_security').on('value', snap => {
-                let d = snap.val();
-                if(d) {
-                    document.getElementById('sec-shift').value = d.shift || '2nd Shift';
-                    document.getElementById('rec-1').value = d.rec1 || '';
-                    document.getElementById('rec-2').value = d.rec2 || '';
-                    document.getElementById('ptl-sec').value = d.ptl || '';
-                    document.getElementById('bms-sec').value = d.bms || '';
-                }
-            });
-
-            db.ref('idfc_parking').on('value', snap => {
-                let data = snap.val();
-                let list = data ? Object.values(data).reverse() : [];
-                let tbody = document.getElementById('parking-table-body');
-                tbody.innerHTML = '';
-                list.forEach((item, i) => {
-                    tbody.innerHTML += `<tr><td>${i+1}</td><td>${item.dateTime || ''}</td><td>${item.type || ''}</td><td>${item.vehicleNo || ''}</td><td>${item.staffName||'N/A'}</td><td>${item.slot || ''}</td></tr>`;
-                });
-            });
-
-            db.ref('idfc_cabs').on('value', snap => {
-                let data = snap.val();
-                let list = data ? Object.values(data).reverse() : [];
-                let tbody = document.getElementById('cab-table-body');
-                tbody.innerHTML = '';
-                list.forEach((item, i) => {
-                    tbody.innerHTML += `<tr><td>${i+1}</td><td>${item.cabNo || ''}</td><td>${item.time || ''}</td><td>${item.driver||'N/A'}</td><td>${item.locations || ''}</td></tr>`;
-                });
-            });
         }
 
         function saveHeadcount() {
-            let data = {
+            const data = {
                 onRoll: document.getElementById('on-roll').value,
                 offRoll: document.getElementById('off-roll').value,
                 secDuty: document.getElementById('sec-duty').value,
                 hkStaff: document.getElementById('hk-staff').value,
                 techStaff: document.getElementById('tech-staff').value,
                 cafeStaff: document.getElementById('cafe-staff').value,
-                sender: document.getElementById('sender-name').value
+                sender: document.getElementById('sender-name').value,
+                timestamp: new Date().toISOString()
             };
-            let dateKey = new Date().toISOString().split('T')[0];
-            db.ref('idfc_headcount').set(data);
-            db.ref('history_headcount/' + dateKey).set(data);
+            localStorage.setItem('idfc_headcount', JSON.stringify(data));
+            
+            const dateKey = new Date().toISOString().split('T')[0];
+            localStorage.setItem('idfc_headcount_' + dateKey, JSON.stringify(data));
+
             alert('Headcount saved successfully!');
         }
 
-        function saveSecurity() {
-            let data = {
-                shift: document.getElementById('sec-shift').value,
-                rec1: document.getElementById('rec-1').value,
-                rec2: document.getElementById('rec-2').value,
-                ptl: document.getElementById('ptl-sec').value,
-                bms: document.getElementById('bms-sec').value
-            };
-            db.ref('idfc_security').set(data);
-            alert('Security postings saved successfully!');
-        }
-
-        function saveParking() {
-            let rawVeh = document.getElementById('p-veh-no').value.trim();
-            if(!rawVeh) { alert('Please enter Vehicle Number!'); return; }
-            
-            let entry = {
-                dateKey: new Date().toISOString().split('T')[0],
-                dateTime: document.getElementById('p-datetime').value,
-                type: document.getElementById('p-type').value,
-                vehicleNo: formatVehicleNumber(rawVeh),
-                staffId: document.getElementById('p-staff-id').value,
-                staffName: document.getElementById('p-staff-name').value,
-                mobile: document.getElementById('p-mobile').value,
-                slot: document.getElementById('p-slot').value
-            };
-
-            db.ref('idfc_parking').push(entry).then(() => {
-                alert('Parking entry saved successfully!');
-                document.getElementById('p-veh-no').value = '';
-                document.getElementById('p-staff-id').value = '';
-                document.getElementById('p-staff-name').value = '';
-                document.getElementById('p-mobile').value = '';
-                document.getElementById('p-slot').value = '';
-                resetAutoTimes();
-            }).catch(error => {
-                alert('Failed to save: ' + error.message);
-            });
-        }
-
-        function saveCab() {
-            let rawCab = document.getElementById('cab-no').value.trim();
-            if(!rawCab) { alert('Please enter Cab Number!'); return; }
-            
-            let entry = {
-                dateKey: new Date().toISOString().split('T')[0],
-                cabNo: formatVehicleNumber(rawCab),
-                time: document.getElementById('cab-time').value,
-                driver: document.getElementById('cab-driver').value,
-                locations: document.getElementById('cab-locations').value
-            };
-
-            db.ref('idfc_cabs').push(entry).then(() => {
-                alert('Cab entry saved successfully!');
-                document.getElementById('cab-no').value = '';
-                document.getElementById('cab-driver').value = '';
-                document.getElementById('cab-locations').value = '';
-                resetAutoTimes();
-            }).catch(error => {
-                alert('Failed to save: ' + error.message);
-            });
-        }
-
-        function loadMasterDataForDate() {
-            let iso = document.getElementById('master-date-picker').value;
-            if(!iso) return;
-            let parts = iso.split('-');
-            let disp = parts[2] + '/' + parts[1] + '/' + parts[0];
-
-            db.ref('history_headcount/' + iso).once('value').then(snap => {
-                let hc = snap.val();
-                db.ref('idfc_parking').once('value').then(ps => {
-                    let pData = ps.val();
-                    let pList = pData ? Object.values(pData).filter(p => p && p.dateKey === iso) : [];
-                    db.ref('idfc_cabs').once('value').then(cs => {
-                        let cData = cs.val();
-                        let cList = cData ? Object.values(cData).filter(c => c && c.dateKey === iso) : [];
-
-                        let html = `<h4>📊 Summary for ${disp}</h4>`;
-                        if(hc) {
-                            let tot = parseInt(hc.onRoll||0)+parseInt(hc.offRoll||0)+parseInt(hc.secDuty||0)+parseInt(hc.hkStaff||0)+parseInt(hc.techStaff||0)+parseInt(hc.cafeStaff||0);
-                            html += `<div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:10px;">Headcount Total: <b>${tot}</b></div>`;
-                        } else {
-                            html += `<p style="color:#888;">No Headcount saved for this date.</p>`;
-                        }
-
-                        html += `<h5>🚘 Parking Entries (${pList.length})</h5><ul>`;
-                        if(pList.length > 0) {
-                            pList.forEach(p => { html += `<li>${p.dateTime || ''} - ${p.vehicleNo || ''} (${p.type || ''}) - ${p.staffName || 'N/A'} (Slot: ${p.slot || ''})</li>`; });
-                        } else {
-                            html += `<li>No parking entries found.</li>`;
-                        }
-                        html += `</ul>`;
-
-                        html += `<h5>🚐 Cab Entries (${cList.length})</h5><ul>`;
-                        if(cList.length > 0) {
-                            cList.forEach(c => { html += `<li>Cab: ${c.cabNo || ''} (${c.time || ''}) - Driver: ${c.driver || ''} | Routes: ${c.locations || ''}</li>`; });
-                        } else {
-                            html += `<li>No cab entries found.</li>`;
-                        }
-                        html += `</ul>`;
-
-                        document.getElementById('master-results').innerHTML = html;
-                    });
-                });
-            });
-        }
-
-        function clearTodayData() {
-            if(confirm('Kya aap aaj ki parking aur cab entries clear karna chahte hain?')) {
-                let today = new Date().toISOString().split('T')[0];
-                db.ref('idfc_parking').once('value', s => {
-                    let d = s.val();
-                    if(d) Object.keys(d).forEach(k => { if(d[k] && d[k].dateKey === today) db.ref('idfc_parking/' + k).remove(); });
-                });
-                db.ref('idfc_cabs').once('value', s => {
-                    let d = s.val();
-                    if(d) Object.keys(d).forEach(k => { if(d[k] && d[k].dateKey === today) db.ref('idfc_cabs/' + k).remove(); });
-                });
-                alert('Today data cleared!');
+        function loadHeadcount() {
+            const saved = JSON.parse(localStorage.getItem('idfc_headcount'));
+            if (saved) {
+                document.getElementById('on-roll').value = saved.onRoll;
+                document.getElementById('off-roll').value = saved.offRoll;
+                document.getElementById('sec-duty').value = saved.secDuty;
+                document.getElementById('hk-staff').value = saved.hkStaff;
+                document.getElementById('tech-staff').value = saved.techStaff;
+                document.getElementById('cafe-staff').value = saved.cafeStaff;
+                document.getElementById('sender-name').value = saved.sender;
+                calculateTotal();
             }
         }
 
         function shareHeadcountWhatsApp() {
-            let text = `*Headcount-${new Date().toLocaleDateString()}*\nTotal: ${document.getElementById('total-headcount').innerText}`;
+            const todayDate = getFormattedDate();
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+            const totalCount = document.getElementById('total-headcount').innerText;
+
+            const text = *Headcount-${todayDate}*\n +
+                         *Airoli Gigaplex Building NO-09*\n +
+                         1] On roll Employee:-${document.getElementById('on-roll').value}\n +
+                         2] Off roll Employee:-${document.getElementById('off-roll').value}\n +
+                         3] Security duty on:-${document.getElementById('sec-duty').value}\n +
+                         4] H K staff on duty:-${document.getElementById('hk-staff').value}\n +
+                         5] Technical staff:-${document.getElementById('tech-staff').value}\n +
+                         6] Cafeteria staff:-${document.getElementById('cafe-staff').value}\n +
+                         Total head count:-${totalCount}\n\n +
+                         *Regards,*\n +
+                         *IDFC First bank*\n +
+                         *Airoli Gigaplex Building NO-09*\n +
+                         *(${senderName})*;
+
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
-        
-        function shareSecurityWhatsApp() { 
-            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Security Report'), '_blank'); 
+
+        // Security Postings Logic
+        function saveSecurity() {
+            const data = {
+                shift: document.getElementById('sec-shift').value,
+                rec1: document.getElementById('rec-1').value,
+                rec2: document.getElementById('rec-2').value,
+                ptl: document.getElementById('ptl-sec').value,
+                bms: document.getElementById('bms-sec').value,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('idfc_security', JSON.stringify(data));
+            
+            const dateKey = new Date().toISOString().split('T')[0];
+            localStorage.setItem('idfc_security_' + dateKey, JSON.stringify(data));
+
+            alert('Security postings saved!');
         }
 
-        function shareParkingWhatsApp() {
-            db.ref('idfc_parking').once('value', snapshot => {
-                let data = snapshot.val();
-                let today = new Date().toISOString().split('T')[0];
-                
-                // Sirf aaj ki entries filter karne ke liye (agar sabhi chahiye toh .filter hata sakte hain)
-                let list = data ? Object.values(data).filter(item => item.dateKey === today) : [];
-                
-                if (list.length === 0) {
-                    alert('Aaj ka koi parking record nahi mila share karne ke liye!');
-                    return;
-                }
+        function loadSecurity() {
+            const saved = JSON.parse(localStorage.getItem('idfc_security'));
+            if (saved) {
+                document.getElementById('sec-shift').value = saved.shift;
+                document.getElementById('rec-1').value = saved.rec1;
+                document.getElementById('rec-2').value = saved.rec2;
+                document.getElementById('ptl-sec').value = saved.ptl;
+                document.getElementById('bms-sec').value = saved.bms;
+            }
+        }
 
-                let text = `*Staff Parking Report - ${new Date().toLocaleDateString('en-GB')}*\n\n`;
-                
-                list.forEach((item, index) => {
-                    let typeCode = item.type === 'Bike' ? 'B' : 'C';
-                    text += `${index + 1}.${item.vehicleNo || ''} (${typeCode}) ${item.staffName || 'N/A'}\n`;
-                });
+        function shareSecurityWhatsApp() {
+            const todayDate = getFormattedDate();
+            
+            const text = *Date:-${todayDate}*\n +
+                         *Security Report - ${document.getElementById('sec-shift').value}*\n\n +
+                         1) ${document.getElementById('rec-1').value} (Rece-01)\n +
+                         2) ${document.getElementById('rec-2').value} (Rece-02)\n +
+                         3) ${document.getElementById('ptl-sec').value} (PTL)\n +
+                         4) ${document.getElementById('bms-sec').value} (BMS)\n\n +
+                         *Airoli B-09 Floor 17th*;
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
 
-                text += `\nAiroli B-09 Floor 17th\nReport By: Jaysing Lande`;
+        // Parking Auto-Fill & Save Logic
+        function autoFillParking(vehNo) {
+            let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (!cleanQuery) return;
+            
+            let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            let found = parkingList.find(p => p.vehicleNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === cleanQuery);
+            
+            if (found) {
+                document.getElementById('p-type').value = found.type;
+                document.getElementById('p-staff-id').value = found.staffId || '';
+                document.getElementById('p-staff-name').value = found.staffName || '';
+                document.getElementById('p-mobile').value = found.mobile || '';
+                document.getElementById('p-slot').value = found.slot || '';
+            }
+        }
 
-                window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        function saveParking() {
+            const type = document.getElementById('p-type').value;
+            const rawVehNo = document.getElementById('p-veh-no').value.trim();
+            const staffId = document.getElementById('p-staff-id').value;
+            const staffName = document.getElementById('p-staff-name').value;
+            const mobile = document.getElementById('p-mobile').value;
+            const slot = document.getElementById('p-slot').value;
+
+            if (!rawVehNo) {
+                alert('Please enter a vehicle number!');
+                return;
+            }
+
+            const vehicleNo = formatVehicleNumber(rawVehNo);
+            const now = new Date();
+            const dateTimeStr = getFormattedDate(now) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateKey = now.toISOString().split('T')[0];
+
+            let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+
+            const newEntry = {
+                dateKey: dateKey,
+                dateTime: dateTimeStr,
+                type: type,
+                vehicleNo: vehicleNo,
+                staffId: staffId,
+                staffName: staffName,
+                mobile: mobile,
+                slot: slot
+            };
+
+            parkingList.unshift(newEntry);
+            localStorage.setItem('idfc_parking', JSON.stringify(parkingList));
+            loadParkingData();
+
+            document.getElementById('p-veh-no').value = '';
+            document.getElementById('p-staff-id').value = '';
+            document.getElementById('p-staff-name').value = '';
+            document.getElementById('p-mobile').value = '';
+            document.getElementById('p-slot').value = '';
+            alert('Parking entry saved successfully!');
+        }
+
+        function loadParkingData() {
+            const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            const tbody = document.getElementById('parking-table-body');
+            tbody.innerHTML = '';
+
+            parkingList.forEach((item, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${item.dateTime}</td>
+                    <td>${item.type}</td>
+                    <td>${item.vehicleNo}</td>
+                    <td>${item.staffName || 'N/A'}</td>
+                    <td>${item.slot}</td>
+                </tr>`;
+                tbody.innerHTML += row;
             });
         }
 
-        function shareCabWhatsApp() { 
-            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Cab Report'), '_blank'); 
+        function shareParkingWhatsApp() {
+            const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            const todayDate = getFormattedDate();
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+
+            let text = *Staff Parking Report - ${todayDate}*\n\n;
+            parkingList.forEach((item, i) => {
+                let typeShort = item.type === 'Bike' ? 'B' : 'C';
+                text += ${i + 1}.${item.vehicleNo} (${typeShort}) ${item.staffName || 'N/A'}\n;
+            });
+            text += \n*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*;
+
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        function shareMasterWhatsApp() { 
-            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Master Report'), '_blank'); 
+        // Cab Auto-Fill & Save Logic
+        function autoFillCab(vehNo) {
+            let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (!cleanQuery) return;
+
+            let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            let found = cabList.find(c => c.cabNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === cleanQuery);
+
+            if (found) {
+                document.getElementById('cab-time').value = found.time || '';
+                document.getElementById('cab-driver').value = found.driver || '';
+                document.getElementById('cab-locations').value = found.locations || '';
+            }
+        }
+
+        function saveCab() {
+            const rawCabNo = document.getElementById('cab-no').value.trim();
+            const time = document.getElementById('cab-time').value.trim();
+            const driver = document.getElementById('cab-driver').value.trim();
+            const locations = document.getElementById('cab-locations').value.trim();
+
+            if (!rawCabNo) {
+                alert('Please enter Cab Vehicle Number!');
+                return;
+            }
+
+            const cabNo = formatVehicleNumber(rawCabNo);
+            const now = new Date();
+            const dateKey = now.toISOString().split('T')[0];
+
+            let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            cabList.unshift({ dateKey, cabNo, time, driver, locations });
+
+            localStorage.setItem('idfc_cabs', JSON.stringify(cabList));
+            loadCabData();
+
+            document.getElementById('cab-no').value = '';
+            document.getElementById('cab-time').value = '';
+            document.getElementById('cab-driver').value = '';
+            document.getElementById('cab-locations').value = '';
+            alert('Cab entry saved successfully!');
+        }
+
+        function loadCabData() {
+            const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            const tbody = document.getElementById('cab-table-body');
+            tbody.innerHTML = '';
+
+            cabList.forEach((item, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${item.cabNo}</td>
+                    <td>${item.time}</td>
+                    <td>${item.driver || 'N/A'}</td>
+                    <td>${item.locations}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function shareCabWhatsApp() {
+            const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            const todayDate = getFormattedDate();
+            const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
+            
+            let text = *Staff Night Cab Report - ${todayDate}*\n\n;
+            
+            if (cabList.length === 0) {
+                text += 1)MH 05 FJ 2531(23:55)Datta Bhau\n +
+                        1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n;
+            } else {
+                cabList.forEach((item, i) => {
+                    let locs = item.locations.split(',').map((l, idx) => ${idx + 1})${l.trim()}).join(' ');
+                    text += ${i + 1})${item.cabNo}(${item.time})${item.driver}\n${locs}\n\n;
+                });
+            }
+
+            text += *Airoli B-09 Floor 17th*\n*Report By: ${senderName}*;
+
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // Master Report Historical Date Search
+        function loadMasterDataForDate() {
+            const selectedISO = document.getElementById('master-date-picker').value;
+            if (!selectedISO) return;
+
+            let parts = selectedISO.split('-');
+            const displayDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+
+            const headcountArch = JSON.parse(localStorage.getItem('idfc_headcount_' + selectedISO));
+            const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
+            const filteredParking = parkingList.filter(p => p.dateKey === selectedISO);
+
+            const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
+            const filteredCabs = cabList.filter(c => c.dateKey === selectedISO);
+
+            let html = <h4>📊 Summary for Date: ${displayDate}</h4>;
+
+            if (headcountArch) {
+                let totalHC = parseInt(headcountArch.onRoll) + parseInt(headcountArch.offRoll) + parseInt(headcountArch.secDuty) + parseInt(headcountArch.hkStaff) + parseInt(headcountArch.techStaff) + parseInt(headcountArch.cafeStaff);
+                html += `<div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:10px;">
+                    <strong>Headcount Report (${displayDate}):</strong><br>
+                    - On Roll: ${headcountArch.onRoll}, Off Roll: ${headcountArch.offRoll}<br>
+                    - Security: ${headcountArch.secDuty}, HK: ${headcountArch.hkStaff}, Tech: ${headcountArch.techStaff}, Cafe: ${headcountArch.cafeStaff}<br>
+                    <strong>Total Head Count: ${totalHC}</strong>
+                </div>`;
+            } else {
+                html += <p style="color:#888;">No Headcount saved for ${displayDate}.</p>;
+            }
+
+            html += <h5>🚘 Parking Entries (${filteredParking.length})</h5>;
+            if (filteredParking.length > 0) {
+                html += <ul>;
+                filteredParking.forEach(p => {
+                    html += <li>${p.dateTime} - ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'} (Slot: ${p.slot})</li>;
+                });
+                html += </ul>;
+            } else {
+                html += <p style="color:#888;">No parking entries found for this date.</p>;
+            }
+
+            html += <h5>🚐 Cab Entries (${filteredCabs.length})</h5>;
+            if (filteredCabs.length > 0) {
+                html += <ul>;
+                filteredCabs.forEach(c => {
+                    html += <li>Cab: ${c.cabNo} (${c.time}) - Driver: ${c.driver} | Routes: ${c.locations}</li>;
+                });
+                html += </ul>;
+            } else {
+                html += <p style="color:#888;">No cab entries found for this date.</p>;
+            }
+
+            document.getElementById('master-results').innerHTML = html;
         }
     </script>
 </body>
