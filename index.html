@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IDFC Security & Operations Dashboard</title>
+    <!-- Tesseract.js for OCR (Number Plate Scanning) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,6 +80,20 @@
         .whatsapp-btn:hover {
             background-color: #1EBE5D;
         }
+        .scan-btn {
+            background-color: #007bff;
+            margin-bottom: 8px;
+        }
+        .scan-btn:hover {
+            background-color: #0056b3;
+        }
+        .clear-btn {
+            background-color: #dc3545;
+            margin-top: 8px;
+        }
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -112,6 +128,12 @@
         }
         .hidden {
             display: none;
+        }
+        .ocr-status {
+            font-size: 12px;
+            color: #007bff;
+            margin-top: 2px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -148,6 +170,7 @@
         <p><strong>Total Head Count: <span id="total-headcount">516</span></strong></p>
         <button onclick="saveHeadcount()">Save Headcount</button>
         <button class="whatsapp-btn" onclick="shareHeadcountWhatsApp()">📤 Share Headcount on WhatsApp</button>
+        <button class="clear-btn" onclick="clearHeadcount()">🗑️ Clear Headcount Data</button>
     </div>
 
     <!-- 2. Security Postings -->
@@ -167,11 +190,21 @@
         <div class="form-group"><label>BMS Security</label><input type="text" id="bms-sec" value="Jaysing Lande"></div>
         <button onclick="saveSecurity()">Save Security Postings</button>
         <button class="whatsapp-btn" onclick="shareSecurityWhatsApp()">📤 Share Security on WhatsApp</button>
+        <button class="clear-btn" onclick="clearSecurity()">🗑️ Clear Security Data</button>
     </div>
 
     <!-- 3. Parking Entry Form -->
     <div class="section-box tab-section" id="sec-parking">
         <h3>🚘 3. Staff Car & Bike Parking Entry Form</h3>
+        
+        <!-- OCR Camera Scan Button -->
+        <div class="form-group">
+            <label>📷 Scan Number Plate via Camera / Gallery</label>
+            <input type="file" id="parking-cam" accept="image/*" capture="environment" style="display:none;" onchange="scanParkingPlate(event)">
+            <button type="button" class="scan-btn" onclick="document.getElementById('parking-cam').click()">📸 Take Photo / Scan Number Plate</button>
+            <div id="parking-ocr-status" class="ocr-status"></div>
+        </div>
+
         <div class="form-group">
             <label>Vehicle Type</label>
             <select id="p-type"><option>Bike</option><option>Car</option></select>
@@ -185,6 +218,7 @@
         <div class="form-group"><label>Mobile</label><input type="text" id="p-mobile" placeholder="Mobile Number"></div>
         <div class="form-group"><label>Slot No.</label><input type="text" id="p-slot" placeholder="Slot No."></div>
         <button onclick="saveParking()">💾 Save Staff Parking</button>
+        <button class="clear-btn" onclick="clearParkingRecords()">🗑️ Clear All Parking Records</button>
         
         <h4>Parking Records</h4>
         <table>
@@ -206,6 +240,15 @@
     <!-- 4. Staff Night Cab Report -->
     <div class="section-box tab-section" id="sec-cab">
         <h3>🚐 4. Staff Night Cab Report</h3>
+
+        <!-- OCR Camera Scan Button for Cab -->
+        <div class="form-group">
+            <label>📷 Scan Cab Number Plate via Camera</label>
+            <input type="file" id="cab-cam" accept="image/*" capture="environment" style="display:none;" onchange="scanCabPlate(event)">
+            <button type="button" class="scan-btn" onclick="document.getElementById('cab-cam').click()">📸 Take Photo / Scan Cab Plate</button>
+            <div id="cab-ocr-status" class="ocr-status"></div>
+        </div>
+
         <div class="form-group">
             <label>Cab Vehicle Number (Auto-Fill)</label>
             <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531" onkeyup="autoFillCab(this.value)">
@@ -214,6 +257,7 @@
         <div class="form-group"><label>Driver / Coordinator</label><input type="text" id="cab-driver" placeholder="Driver Name"></div>
         <div class="form-group"><label>Drop Locations (Comma separated)</label><input type="text" id="cab-locations" placeholder="Ulhasnagar, Vashi, Panvel..."></div>
         <button onclick="saveCab()">💾 Save Cab Entry</button>
+        <button class="clear-btn" onclick="clearCabRecords()">🗑️ Clear All Cab Records</button>
 
         <h4>Cab Records</h4>
         <table>
@@ -233,8 +277,8 @@
 
     <!-- 5. Master Report & Historical Search Section -->
     <div class="section-box tab-section" id="sec-master">
-        <h3>🔍 5. Master Report & Historical Date Search (Old Data)</h3>
-        <p style="font-size: 13px; color: #666;">Select any past date (even months old) to view or search records for that specific day:</p>
+        <h3>🔍 5. Master Report & Historical Date Search</h3>
+        <p style="font-size: 13px; color: #666;">Select any past date to view or share records for that specific day:</p>
         <div class="form-group">
             <label>Select Report Date</label>
             <input type="date" id="master-date-picker" onchange="loadMasterDataForDate()">
@@ -243,10 +287,11 @@
         <div id="master-results" style="margin-top: 15px;">
             <!-- Dynamic historical data will load here -->
         </div>
+        <button class="whatsapp-btn" onclick="shareMasterWhatsApp()">📤 Share Master Report on WhatsApp</button>
     </div>
 
     <script>
-        // Real-time Clock in Header
+        // Real-time Clock in Header & Auto Time in Cabs
         setInterval(() => {
             const now = new Date();
             document.getElementById('current-time').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
@@ -258,13 +303,16 @@
             loadParkingData();
             loadCabData();
             
-            // Set default date picker to today in Master tab
             const todayISO = new Date().toISOString().split('T')[0];
             document.getElementById('master-date-picker').value = todayISO;
             loadMasterDataForDate();
+
+            const currentTimeHHMM = String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0');
+            if(document.getElementById('cab-time')) {
+                document.getElementById('cab-time').value = currentTimeHHMM;
+            }
         };
 
-        // Tab Switching for Mobile Ease
         function switchTab(tab) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('hidden'));
             ['all', 'headcount', 'security', 'parking', 'cab', 'master'].forEach(t => document.getElementById('btn-' + t).classList.remove('active'));
@@ -276,7 +324,6 @@
             document.getElementById('btn-' + tab).classList.add('active');
         }
 
-        // Helper to format vehicle number properly (e.g., MH 01 AB 6229)
         function formatVehicleNumber(inputStr) {
             if (!inputStr) return '';
             let clean = inputStr.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
@@ -287,7 +334,6 @@
             return clean;
         }
 
-        // Helper to get formatted date string DD/MM/YYYY from Date object or ISO string
         function getFormattedDate(dateObj = new Date()) {
             return String(dateObj.getDate()).padStart(2, '0') + '/' + 
                    String(dateObj.getMonth() + 1).padStart(2, '0') + '/' + 
@@ -317,10 +363,8 @@
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('idfc_headcount', JSON.stringify(data));
-            
             const dateKey = new Date().toISOString().split('T')[0];
             localStorage.setItem('idfc_headcount_' + dateKey, JSON.stringify(data));
-
             alert('Headcount saved successfully!');
         }
 
@@ -338,6 +382,14 @@
             }
         }
 
+        function clearHeadcount() {
+            if(confirm('Are you sure you want to clear headcount data?')) {
+                localStorage.removeItem('idfc_headcount');
+                alert('Headcount data cleared!');
+                location.reload();
+            }
+        }
+
         function shareHeadcountWhatsApp() {
             const todayDate = getFormattedDate();
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
@@ -352,10 +404,7 @@
                          `5] Technical staff:-${document.getElementById('tech-staff').value}\n` +
                          `6] Cafeteria staff:-${document.getElementById('cafe-staff').value}\n` +
                          `Total head count:-${totalCount}\n\n` +
-                         `*Regards,*\n` +
-                         `*IDFC First bank*\n` +
-                         `*Airoli Gigaplex Building NO-09*\n` +
-                         `*(${senderName})*`;
+                         `*Regards,*\n*IDFC First bank*\n*Airoli Gigaplex Building NO-09*\n*(${senderName})*`;
 
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
@@ -371,10 +420,8 @@
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('idfc_security', JSON.stringify(data));
-            
             const dateKey = new Date().toISOString().split('T')[0];
             localStorage.setItem('idfc_security_' + dateKey, JSON.stringify(data));
-
             alert('Security postings saved!');
         }
 
@@ -389,9 +436,16 @@
             }
         }
 
+        function clearSecurity() {
+            if(confirm('Are you sure you want to clear security data?')) {
+                localStorage.removeItem('idfc_security');
+                alert('Security data cleared!');
+                location.reload();
+            }
+        }
+
         function shareSecurityWhatsApp() {
             const todayDate = getFormattedDate();
-            
             const text = `*Date:-${todayDate}*\n` +
                          `*Security Report - ${document.getElementById('sec-shift').value}*\n\n` +
                          `1) ${document.getElementById('rec-1').value} (Rece-01)\n` +
@@ -402,14 +456,34 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
+        // OCR Camera Scan for Parking Plate
+        function scanParkingPlate(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('parking-ocr-status');
+            statusEl.innerText = "⏳ Scanning number plate from image...";
+
+            Tesseract.recognize(
+                file,
+                'eng',
+                { logger: m => console.log(m) }
+            ).then(({ data: { text } }) => {
+                statusEl.innerText = "✅ Scan complete!";
+                let cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                document.getElementById('p-veh-no').value = cleaned;
+                autoFillParking(cleaned);
+            }).catch(err => {
+                statusEl.innerText = "❌ Scan failed. Please enter manually.";
+                console.error(err);
+            });
+        }
+
         // Parking Auto-Fill & Save Logic
         function autoFillParking(vehNo) {
             let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             if (!cleanQuery) return;
-            
             let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
             let found = parkingList.find(p => p.vehicleNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === cleanQuery);
-            
             if (found) {
                 document.getElementById('p-type').value = found.type;
                 document.getElementById('p-staff-id').value = found.staffId || '';
@@ -438,19 +512,7 @@
             const dateKey = now.toISOString().split('T')[0];
 
             let parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
-
-            const newEntry = {
-                dateKey: dateKey,
-                dateTime: dateTimeStr,
-                type: type,
-                vehicleNo: vehicleNo,
-                staffId: staffId,
-                staffName: staffName,
-                mobile: mobile,
-                slot: slot
-            };
-
-            parkingList.unshift(newEntry);
+            parkingList.unshift({ dateKey, dateTime: dateTimeStr, type, vehicleNo, staffId, staffName, mobile, slot });
             localStorage.setItem('idfc_parking', JSON.stringify(parkingList));
             loadParkingData();
 
@@ -459,6 +521,7 @@
             document.getElementById('p-staff-name').value = '';
             document.getElementById('p-mobile').value = '';
             document.getElementById('p-slot').value = '';
+            document.getElementById('parking-ocr-status').innerText = '';
             alert('Parking entry saved successfully!');
         }
 
@@ -466,9 +529,8 @@
             const parkingList = JSON.parse(localStorage.getItem('idfc_parking')) || [];
             const tbody = document.getElementById('parking-table-body');
             tbody.innerHTML = '';
-
             parkingList.forEach((item, index) => {
-                let row = `<tr>
+                tbody.innerHTML += `<tr>
                     <td>${index + 1}</td>
                     <td>${item.dateTime}</td>
                     <td>${item.type}</td>
@@ -476,8 +538,15 @@
                     <td>${item.staffName || 'N/A'}</td>
                     <td>${item.slot}</td>
                 </tr>`;
-                tbody.innerHTML += row;
             });
+        }
+
+        function clearParkingRecords() {
+            if(confirm('Are you sure you want to delete all parking records?')) {
+                localStorage.removeItem('idfc_parking');
+                loadParkingData();
+                alert('Parking records cleared!');
+            }
         }
 
         function shareParkingWhatsApp() {
@@ -491,18 +560,37 @@
                 text += `${i + 1}.${item.vehicleNo} (${typeShort}) ${item.staffName || 'N/A'}\n`;
             });
             text += `\n*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
-
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // OCR Camera Scan for Cab Plate
+        function scanCabPlate(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('cab-ocr-status');
+            statusEl.innerText = "⏳ Scanning cab number plate...";
+
+            Tesseract.recognize(
+                file,
+                'eng',
+                { logger: m => console.log(m) }
+            ).then(({ data: { text } }) => {
+                statusEl.innerText = "✅ Scan complete!";
+                let cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                document.getElementById('cab-no').value = cleaned;
+                autoFillCab(cleaned);
+            }).catch(err => {
+                statusEl.innerText = "❌ Scan failed. Please enter manually.";
+                console.error(err);
+            });
         }
 
         // Cab Auto-Fill & Save Logic
         function autoFillCab(vehNo) {
             let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             if (!cleanQuery) return;
-
             let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
             let found = cabList.find(c => c.cabNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === cleanQuery);
-
             if (found) {
                 document.getElementById('cab-time').value = found.time || '';
                 document.getElementById('cab-driver').value = found.driver || '';
@@ -527,14 +615,13 @@
 
             let cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
             cabList.unshift({ dateKey, cabNo, time, driver, locations });
-
             localStorage.setItem('idfc_cabs', JSON.stringify(cabList));
             loadCabData();
 
             document.getElementById('cab-no').value = '';
-            document.getElementById('cab-time').value = '';
             document.getElementById('cab-driver').value = '';
             document.getElementById('cab-locations').value = '';
+            document.getElementById('cab-ocr-status').innerText = '';
             alert('Cab entry saved successfully!');
         }
 
@@ -542,17 +629,23 @@
             const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
             const tbody = document.getElementById('cab-table-body');
             tbody.innerHTML = '';
-
             cabList.forEach((item, index) => {
-                let row = `<tr>
+                tbody.innerHTML += `<tr>
                     <td>${index + 1}</td>
                     <td>${item.cabNo}</td>
                     <td>${item.time}</td>
                     <td>${item.driver || 'N/A'}</td>
                     <td>${item.locations}</td>
                 </tr>`;
-                tbody.innerHTML += row;
             });
+        }
+
+        function clearCabRecords() {
+            if(confirm('Are you sure you want to delete all cab records?')) {
+                localStorage.removeItem('idfc_cabs');
+                loadCabData();
+                alert('Cab records cleared!');
+            }
         }
 
         function shareCabWhatsApp() {
@@ -561,23 +654,20 @@
             const senderName = document.getElementById('sender-name').value || 'Jaysing Lande';
             
             let text = `*Staff Night Cab Report - ${todayDate}*\n\n`;
-            
             if (cabList.length === 0) {
-                text += `1)MH 05 FJ 2531(23:55)Datta Bhau\n` +
-                        `1)Ulhasnagar 2)Vashi 3)Panvel 4)Thane 5)Nerul 6)Airoli 7)Sanpada\n\n`;
+                text += `1)MH 05 FJ 2531(23:55)Datta Bhau\n1)Ulhasnagar 2)Vashi 3)Panvel\n\n`;
             } else {
                 cabList.forEach((item, i) => {
                     let locs = item.locations.split(',').map((l, idx) => `${idx + 1})${l.trim()}`).join(' ');
                     text += `${i + 1})${item.cabNo}(${item.time})${item.driver}\n${locs}\n\n`;
                 });
             }
-
             text += `*Airoli B-09 Floor 17th*\n*Report By: ${senderName}*`;
-
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Master Report Historical Date Search
+        // Master Report Historical Date Search & Share
+        let masterShareText = "";
         function loadMasterDataForDate() {
             const selectedISO = document.getElementById('master-date-picker').value;
             if (!selectedISO) return;
@@ -592,43 +682,61 @@
             const cabList = JSON.parse(localStorage.getItem('idfc_cabs')) || [];
             const filteredCabs = cabList.filter(c => c.dateKey === selectedISO);
 
+            masterShareText = `*📋 MASTER REPORT - ${displayDate}*\n*Airoli Gigaplex Building NO-09*\n\n`;
+
             let html = `<h4>📊 Summary for Date: ${displayDate}</h4>`;
 
             if (headcountArch) {
                 let totalHC = parseInt(headcountArch.onRoll) + parseInt(headcountArch.offRoll) + parseInt(headcountArch.secDuty) + parseInt(headcountArch.hkStaff) + parseInt(headcountArch.techStaff) + parseInt(headcountArch.cafeStaff);
                 html += `<div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:10px;">
-                    <strong>Headcount Report (${displayDate}):</strong><br>
+                    <strong>Headcount Report:</strong><br>
                     - On Roll: ${headcountArch.onRoll}, Off Roll: ${headcountArch.offRoll}<br>
                     - Security: ${headcountArch.secDuty}, HK: ${headcountArch.hkStaff}, Tech: ${headcountArch.techStaff}, Cafe: ${headcountArch.cafeStaff}<br>
-                    <strong>Total Head Count: ${totalHC}</strong>
+                    <strong>Total: ${totalHC}</strong>
                 </div>`;
+                masterShareText += `*Headcount Summary:* Total: ${totalHC}\n\n`;
             } else {
                 html += `<p style="color:#888;">No Headcount saved for ${displayDate}.</p>`;
             }
 
             html += `<h5>🚘 Parking Entries (${filteredParking.length})</h5>`;
+            masterShareText += `*Parking Entries (${filteredParking.length}):*\n`;
             if (filteredParking.length > 0) {
                 html += `<ul>`;
-                filteredParking.forEach(p => {
-                    html += `<li>${p.dateTime} - ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'} (Slot: ${p.slot})</li>`;
+                filteredParking.forEach((p, idx) => {
+                    html += `<li>${p.dateTime} - ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'}</li>`;
+                    masterShareText += `${idx + 1}. ${p.vehicleNo} (${p.type}) - ${p.staffName || 'N/A'}\n`;
                 });
                 html += `</ul>`;
             } else {
-                html += `<p style="color:#888;">No parking entries found for this date.</p>`;
+                html += `<p style="color:#888;">No parking entries.</p>`;
+                masterShareText += `None\n`;
             }
 
             html += `<h5>🚐 Cab Entries (${filteredCabs.length})</h5>`;
+            masterShareText += `\n*Cab Entries (${filteredCabs.length}):*\n`;
             if (filteredCabs.length > 0) {
                 html += `<ul>`;
-                filteredCabs.forEach(c => {
+                filteredCabs.forEach((c, idx) => {
                     html += `<li>Cab: ${c.cabNo} (${c.time}) - Driver: ${c.driver} | Routes: ${c.locations}</li>`;
+                    masterShareText += `${idx + 1}. ${c.cabNo} (${c.time}) - Driver: ${c.driver}\n`;
                 });
                 html += `</ul>`;
             } else {
-                html += `<p style="color:#888;">No cab entries found for this date.</p>`;
+                html += `<p style="color:#888;">No cab entries.</p>`;
+                masterShareText += `None\n`;
             }
 
+            masterShareText += `\n*Airoli B-09 Floor 17th*`;
             document.getElementById('master-results').innerHTML = html;
+        }
+
+        function shareMasterWhatsApp() {
+            if(!masterShareText) {
+                alert('Please select a date first!');
+                return;
+            }
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(masterShareText), '_blank');
         }
     </script>
 </body>
