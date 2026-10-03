@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IDFC Security & Operations</title>
-    <!-- Tesseract.js for OCR -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,13 +78,6 @@
         .whatsapp-btn:hover {
             background-color: #1EBE5D;
         }
-        .scan-btn {
-            background-color: #007bff;
-            margin-bottom: 8px;
-        }
-        .scan-btn:hover {
-            background-color: #0056b3;
-        }
         .clear-btn {
             background-color: #dc3545;
             margin-top: 8px;
@@ -128,12 +119,6 @@
         }
         .hidden {
             display: none;
-        }
-        .ocr-status {
-            font-size: 13px;
-            color: #d9534f;
-            margin-top: 4px;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -190,27 +175,18 @@
         <div class="form-group"><label>BMS Security</label><input type="text" id="bms-sec" value="Jaysing Lande"></div>
         <button onclick="saveSecurity()">Save Security Postings</button>
         <button class="whatsapp-btn" onclick="shareSecurityWhatsApp()">📤 Share Security on WhatsApp</button>
-        <button class="clear-btn" onclick="clearSecurity()">🗑️️ Clear Security Data</button>
+        <button class="clear-btn" onclick="clearSecurity()">🗑 Clear Security Data</button>
     </div>
 
     <!-- 3. Parking Entry Form -->
     <div class="section-box tab-section" id="sec-parking">
         <h3>🚘 3. Staff Car & Bike Parking Entry Form</h3>
-        
-        <!-- Fast OCR Camera Scan Button -->
-        <div class="form-group">
-            <label>📷 Fast Camera Scan Number Plate</label>
-            <input type="file" id="parking-cam" accept="image/*" capture="environment" style="display:none;" onchange="scanParkingPlate(event)">
-            <button type="button" class="scan-btn" onclick="document.getElementById('parking-cam').click()">📸 Take Photo / Scan Plate Now</button>
-            <div id="parking-ocr-status" class="ocr-status"></div>
-        </div>
-
         <div class="form-group">
             <label>Vehicle Type</label>
             <select id="p-type"><option>Bike</option><option>Car</option></select>
         </div>
         <div class="form-group">
-            <label>Vehicle Number (Auto-Fill / Edit)</label>
+            <label>Vehicle Number</label>
             <input type="text" id="p-veh-no" placeholder="e.g. MH01AB6229" onkeyup="autoFillParking(this.value)">
         </div>
         <div class="form-group"><label>Staff ID</label><input type="text" id="p-staff-id" placeholder="Staff ID"></div>
@@ -240,17 +216,8 @@
     <!-- 4. Staff Night Cab Report -->
     <div class="section-box tab-section" id="sec-cab">
         <h3>🚐 4. Staff Night Cab Report</h3>
-
-        <!-- Fast OCR Camera Scan Button for Cab -->
         <div class="form-group">
-            <label>📷 Fast Camera Scan Cab Plate</label>
-            <input type="file" id="cab-cam" accept="image/*" capture="environment" style="display:none;" onchange="scanCabPlate(event)">
-            <button type="button" class="scan-btn" onclick="document.getElementById('cab-cam').click()">📸 Take Photo / Scan Cab Plate Now</button>
-            <div id="cab-ocr-status" class="ocr-status"></div>
-        </div>
-
-        <div class="form-group">
-            <label>Cab Vehicle Number (Auto-Fill)</label>
+            <label>Cab Vehicle Number</label>
             <input type="text" id="cab-no" placeholder="e.g. MH05FJ2531" onkeyup="autoFillCab(this.value)">
         </div>
         <div class="form-group"><label>Timing (HH:MM)</label><input type="text" id="cab-time" placeholder="23:55"></div>
@@ -453,36 +420,6 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Fast OCR Camera Scan for Parking Plate
-        function scanParkingPlate(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const statusEl = document.getElementById('parking-ocr-status');
-            statusEl.innerText = "⚡ Reading number plate instantly...";
-
-            Tesseract.recognize(
-                file,
-                'eng',
-                { 
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            let prog = Math.round(m.progress * 100);
-                            statusEl.innerText = `⚡ Reading... ${prog}%`;
-                        }
-                    }
-                }
-            ).then(({ data: { text } }) => {
-                let cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                document.getElementById('p-veh-no').value = cleaned;
-                autoFillParking(cleaned);
-                statusEl.innerText = "✅ Done! Number captured successfully.";
-                setTimeout(() => { statusEl.innerText = ""; }, 3000);
-            }).catch(err => {
-                statusEl.innerText = "⚠️️ Auto-read failed. Please type manually below.";
-                console.error(err);
-            });
-        }
-
         function autoFillParking(vehNo) {
             let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             if (!cleanQuery) return;
@@ -525,7 +462,6 @@
             document.getElementById('p-staff-name').value = '';
             document.getElementById('p-mobile').value = '';
             document.getElementById('p-slot').value = '';
-            document.getElementById('parking-ocr-status').innerText = '';
             alert('Parking entry saved successfully!');
         }
 
@@ -567,36 +503,6 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Fast OCR Camera Scan for Cab Plate
-        function scanCabPlate(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const statusEl = document.getElementById('cab-ocr-status');
-            statusEl.innerText = "⚡ Reading cab plate instantly...";
-
-            Tesseract.recognize(
-                file,
-                'eng',
-                { 
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            let prog = Math.round(m.progress * 100);
-                            statusEl.innerText = `⚡ Reading... ${prog}%`;
-                        }
-                    }
-                }
-            ).then(({ data: { text } }) => {
-                let cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                document.getElementById('cab-no').value = cleaned;
-                autoFillCab(cleaned);
-                statusEl.innerText = "✅ Done! Cab number captured.";
-                setTimeout(() => { statusEl.innerText = ""; }, 3000);
-            }).catch(err => {
-                statusEl.innerText = "⚠️ Auto-read failed. Please type manually.";
-                console.error(err);
-            });
-        }
-
         function autoFillCab(vehNo) {
             let cleanQuery = vehNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             if (!cleanQuery) return;
@@ -632,7 +538,6 @@
             document.getElementById('cab-no').value = '';
             document.getElementById('cab-driver').value = '';
             document.getElementById('cab-locations').value = '';
-            document.getElementById('cab-ocr-status').innerText = '';
             alert('Cab entry saved successfully!');
         }
 
@@ -677,7 +582,6 @@
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
         }
 
-        // Master Report Historical Date Search & Share
         let masterShareText = "";
         function loadMasterDataForDate() {
             const selectedISO = document.getElementById('master-date-picker').value;
